@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+
+{% block title %}Empresas | WordCounter{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4">
+    <h1 class="text-3xl font-bold mb-6">Lista de Empresas</h1>
+
+    <div class="bg-white shadow rounded-2xl overflow-x-auto">
+        <table class="min-w-full table-auto text-sm text-gray-700">
+            <thead class="bg-gray-200 text-gray-700">
+                <tr>
+                    <th class="px-4 py-2 text-left">RUC</th>
+                    <th class="px-4 py-2 text-left">Nombre</th>
+                    <th class="px-4 py-2 text-left">Provincia</th>
+                    <th class="px-4 py-2 text-left">País</th>
+                    <th class="px-4 py-2 text-left">Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for company in companies %}
+                <tr class="border-t hover:bg-gray-100">
+                    <td class="px-4 py-2">{{ company.ruc }}</td>
+                    <td class="px-4 py-2">{{ company.name }}</td>
+                    <td class="px-4 py-2">{{ company.province.name }}</td>
+                    <td class="px-4 py-2">{{ company.province.country.name }}</td>
+                    <td class="px-4 py-2 space-x-2">
+                        
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="5" class="px-4 py-4 text-center text-gray-500">No hay empresas registradas.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

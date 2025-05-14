@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Subir Reportes | WordCounter{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 max-w-3xl">
+    <h1 class="text-3xl font-bold mb-6">Subida de Reportes</h1>
+
+    {% if messages %}
+        <div class="mb-6">
+            {% for message in messages %}
+                <div class="p-4 rounded-lg 
+                            {% if message.tags == 'success' %}
+                                bg-green-100 text-green-800
+                            {% elif message.tags == 'error' %}
+                                bg-red-100 text-red-800
+                            {% else %}
+                                bg-gray-100 text-gray-800
+                            {% endif %}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    <!-- *Formulario individual -->
+    <div class="bg-white p-6 rounded-2xl shadow mb-8">
+        <h2 class="text-xl font-semibold mb-4">Subir Reporte Individual</h2>
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            <div class="mb-4">
+                <label class="block mb-1 font-medium">Empresa</label>
+                {{ individual_form.company }}
+            </div>
+            <div class="mb-4">
+                <label class="block mb-1 font-medium">Año</label>
+                {{ individual_form.year }}
+            </div>
+            <div class="mb-4">
+                <label class="block mb-1 font-medium">Archivo</label>
+                {{ individual_form.file }}
+            </div>
+            <button type="submit" name="upload_individual"
+                class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition">
+                Subir Individual
+            </button>
+        </form>
+    </div>
+
+    <!-- Formulario ZIP -->
+    <div class="bg-white p-6 rounded-2xl shadow">
+        <h2 class="text-xl font-semibold mb-4">Subir Múltiples Reportes (ZIP)</h2>
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            <div class="mb-4">
+                <label class="block mb-1 font-medium">Empresa</label>
+                <select name="zip_company" class="border rounded px-2 py-1 w-full">
+                    {% for company in companies %}
+                        <option value="{{ company.id }}">{{ company.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="mb-4">
+                <label class="block mb-1 font-medium">Archivo ZIP</label>
+                <input type="file" name="zip_file" accept=".zip" class="border rounded px-2 py-1 w-full">
+            </div>
+            <button type="submit" name="upload_zip"
+                class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 transition">
+                Subir ZIP
+            </button>
+        </form>
+    </div>
+</div>
+{% endblock %}

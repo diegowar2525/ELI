@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+
+{% block title %}Inicio | WordCounter{% endblock %}
+
+{% block content %}
+
+<!-- Hero principal -->
+<section class="text-center py-16 px-4 bg-white">
+    <h1 class="text-4xl font-bold text-blue-700 mb-4">Bienvenido a WordCounter</h1>
+    <p class="text-lg text-gray-700 mb-6 max-w-xl mx-auto">
+        Sube tus reportes y descubre las palabras más usadas en ellos por año.
+    </p>
+    <a href="{% url 'panel' %}" class="bg-blue-500 text-white px-6 py-3 rounded-lg text-lg hover:bg-blue-600 transition duration-300">
+        Empezar
+    </a>
+</section>
+
+<!-- Sección de características -->
+<section class="bg-gray-100 py-16 px-4">
+    <div class="max-w-5xl mx-auto grid md:grid-cols-3 gap-8 text-center">
+        <div>
+            <h2 class="text-xl font-semibold text-blue-600 mb-2">Análisis Automático</h2>
+            <p class="text-gray-600">Detecta y visualiza las palabras más repetidas por año de manera rápida y precisa.</p>
+        </div>
+        <div>
+            <h2 class="text-xl font-semibold text-blue-600 mb-2">Informes Detallados</h2>
+            <p class="text-gray-600">Exporta datos relevantes para su análisis posterior con gráficos y tablas.</p>
+        </div>
+        <div>
+            <h2 class="text-xl font-semibold text-blue-600 mb-2">Interfaz Intuitiva</h2>
+            <p class="text-gray-600">Diseñada para que cualquier usuario pueda subir y analizar archivos fácilmente.</p>
+        </div>
+    </div>
+</section>
+
+<!-- Sección de beneficios -->
+<section class="py-16 px-4 bg-white">
+    <div class="max-w-4xl mx-auto text-center">
+        <h2 class="text-3xl font-bold text-gray-800 mb-6">¿Por qué usar WordCounter?</h2>
+        <p class="text-gray-700 mb-8">
+            Optimiza tu tiempo en el análisis de documentos extensos. WordCounter te ayuda a encontrar patrones, temas recurrentes
+            y puntos clave en tus textos con solo unos clics.
+        </p>
+        <a href="{% url 'register' %}" class="bg-green-500 text-white px-6 py-3 rounded-lg text-lg hover:bg-green-600 transition duration-300">
+            Crear una cuenta gratis
+        </a>
+    </div>
+</section>
+
+<!-- Llamado final a la acción -->
+<section class="bg-blue-50 py-12 px-4 text-center">
+    <h2 class="text-2xl font-bold text-gray-800 mb-4">¿Listo para comenzar?</h2>
+    <p class="text-gray-600 mb-6">Sube tu primer reporte y deja que WordCounter haga el trabajo pesado por ti.</p>
+    <a href="{% url 'panel' %}" class="bg-blue-600 text-white px-5 py-3 rounded-lg hover:bg-blue-700 transition duration-300">
+        Ir al panel
+    </a>
+</section>
+
+{% endblock %}
+
+{% block scripts %}
+
+{% endblock %}
