@@ -1,5 +1,5 @@
 from django import forms
-from .models import Report
+from .models import Report, Company
 
 
 class IndividualReportUploadForm(forms.ModelForm):
@@ -20,3 +20,13 @@ class IndividualReportUploadForm(forms.ModelForm):
 class ZipUploadForm(forms.Form):
     zip_file = forms.FileField(label="Archivo ZIP")
 
+
+class CompanyForm(forms.ModelForm):
+    class Meta:
+        model = Company
+        fields = ["ruc", "name", "province"]
+        widgets = {
+            "ruc": forms.TextInput(attrs={"class": "border rounded px-2 py-1"}),
+            "name": forms.TextInput(attrs={"class": "border rounded px-2 py-1"}),
+            "province": forms.Select(attrs={"class": "border rounded px-2 py-1"}),
+        }

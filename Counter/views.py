@@ -1,10 +1,13 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
-from .models import Report, Company
-from .forms import IndividualReportUploadForm, ZipUploadForm
+from .models import Report, Company, Province
+from .forms import IndividualReportUploadForm, ZipUploadForm, CompanyForm
 from django.contrib import messages
+from django.http import JsonResponse
 import os
 from django.conf import settings
+from django.views.decorators.csrf import csrf_exempt
+
 
 # Create your views here.
 def index_view(request):
@@ -17,14 +20,96 @@ def panel_view(request):
 
 
 def companies_view(request):
-    companies = Company.objects.select_related('province__country').all().order_by('name')
-    return render(request, 'companies.html', {'companies': companies})
+    companies = (
+        Company.objects.select_related("province__country").all().order_by("name")
+    )
+    provinces = Province.objects.select_related("country").all()
+    return render(
+        request,
+        "companies.html",
+        {
+            "companies": companies,
+            "provinces": provinces,
+        },
+    )
+
+
+@csrf_exempt
+def create_company(request):
+    if request.method == "POST":
+        ruc = request.POST.get("ruc")
+        name = request.POST.get("name")
+        province_id = request.POST.get("province")
+
+        errors = {}
+
+        if not ruc:
+            errors["ruc"] = ["Este campo es obligatorio."]
+        if not name:
+            errors["name"] = ["Este campo es obligatorio."]
+        if not province_id:
+            errors["province"] = ["Este campo es obligatorio."]
+
+        try:
+            province = Province.objects.get(id=province_id)
+        except Province.DoesNotExist:
+            errors["province"] = ["Provincia no válida."]
+            province = None
+
+        if errors:
+            return JsonResponse({"errors": errors}, status=400)
+
+        company = Company.objects.create(ruc=ruc, name=name, province=province)
+
+        return JsonResponse(
+            {
+                "id": company.id,
+                "ruc": company.ruc,
+                "name": company.name,
+                "province": company.province.name,
+                "country": company.province.country.name,
+            }
+        )
+
+    return JsonResponse({"error": "Método no permitido"}, status=405)
+
+
+def see_company_json(request, company_id):
+    company = Company.objects.select_related('province__country').get(id=company_id)
+    data = {
+        'ruc': company.ruc,
+        'name': company.name,
+        'province': company.province.name,
+        'country': company.province.country.name
+    }
+    return JsonResponse(data)
+
+
+@csrf_exempt
+def edit_company(request, id):
+    company = Company.objects.get(id=id)
+    if request.method == "POST":
+        form = CompanyForm(request.POST, instance=company)
+        if form.is_valid():
+            company = form.save()
+            return JsonResponse(
+                {
+                    "id": company.id,
+                    "ruc": company.ruc,
+                    "name": company.name,
+                    "province": company.province.name,
+                    "country": company.province.country.name,
+                }
+            )
+        else:
+            return JsonResponse({"errors": form.errors}, status=400)
+    return JsonResponse({"error": "Método no permitido"}, status=405)
 
 
 def reports_view(request):
-    reports = Report.objects.all().order_by('upload_date')
-    return render(request, 'reports.html', {'reports': reports})
-    
+    reports = Report.objects.all().order_by("upload_date")
+    return render(request, "reports.html", {"reports": reports})
+
 
 def totalcount_view(request):
     return render(request, "totalcount.html")
@@ -35,32 +120,36 @@ def upload_view(request):
     zip_form = ZipUploadForm()
     companies = Company.objects.all()
 
-    if request.method == 'POST':
-        if 'upload_individual' in request.POST:
+    if request.method == "POST":
+        if "upload_individual" in request.POST:
             individual_form = IndividualReportUploadForm(request.POST, request.FILES)
             if individual_form.is_valid():
                 individual_form.save()
                 messages.success(request, "Reporte subido correctamente.")
-                return redirect('upload')
+                return redirect("upload")
 
-        elif 'upload_zip' in request.POST:
+        elif "upload_zip" in request.POST:
             zip_form = ZipUploadForm(request.POST, request.FILES)
             if zip_form.is_valid():
-                zip_file = zip_form.cleaned_data['zip_file']
-                zip_path = os.path.join(settings.MEDIA_ROOT, 'zip_uploads', zip_file.name)
+                zip_file = zip_form.cleaned_data["zip_file"]
+                zip_path = os.path.join(
+                    settings.MEDIA_ROOT, "zip_uploads", zip_file.name
+                )
                 os.makedirs(os.path.dirname(zip_path), exist_ok=True)
 
-                with open(zip_path, 'wb+') as destination:
+                with open(zip_path, "wb+") as destination:
                     for chunk in zip_file.chunks():
                         destination.write(chunk)
 
                 messages.success(request, "Archivo ZIP subido correctamente.")
-                return redirect('upload')
+                return redirect("upload")
 
-    return render(request, 'upload.html', {
-        'individual_form': individual_form,
-        'zip_form': zip_form,
-        'companies': companies,
-    })
-
-
+    return render(
+        request,
+        "upload.html",
+        {
+            "individual_form": individual_form,
+            "zip_form": zip_form,
+            "companies": companies,
+        },
+    )

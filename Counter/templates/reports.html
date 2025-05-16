@@ -25,7 +25,17 @@
                     <td class="px-4 py-2">{{ reporte.fecha_creacion }}</td>
                     <td class="px-4 py-2">{{ reporte.empresa.nombre }}</td>
                     <td class="px-4 py-2">
-
+                        {% if reporte %}
+                            <button class="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-1 px-3 rounded">
+                                Detalles
+                            </button>
+                            <button class="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-1 px-3 rounded">
+                                Editar
+                            </button>
+                            <button class="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-1 px-3 rounded">
+                                Borrar
+                            </button>
+                        {% endif %}
                     </td>
                 </tr>
                 {% empty %}

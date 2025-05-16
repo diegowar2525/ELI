@@ -6,6 +6,56 @@
 <div class="container mx-auto px-4">
     <h1 class="text-3xl font-bold mb-6">Lista de Empresas</h1>
 
+    <!-- !Modal Crear-->
+    <div id="createModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50">
+        <div class="bg-white p-6 rounded-xl w-full max-w-md shadow-lg relative">
+            <h2 class="text-xl font-bold mb-4">Nueva Empresa</h2>
+            <form id="createForm">
+                {% csrf_token %}
+                <div class="mb-3">
+                    <label class="block font-medium">RUC</label>
+                    <input type="text" name="ruc" class="w-full border rounded p-2" />
+                    <p class="text-red-500 text-sm" id="error-ruc"></p>
+                </div>
+                <div class="mb-3">
+                    <label class="block font-medium">Nombre</label>
+                    <input type="text" name="name" class="w-full border rounded p-2" />
+                    <p class="text-red-500 text-sm" id="error-name"></p>
+                </div>
+                <div class="mb-3">
+                    <label class="block font-medium">Provincia</label>
+                    <select name="province" class="w-full border rounded p-2">
+                        {% for province in provinces %}
+                        <option value="{{ province.id }}">{{ province.name }}</option>
+                        {% endfor %}
+                    </select>
+                    <p class="text-red-500 text-sm" id="error-province"></p>
+                </div>
+                <div class="flex justify-end mt-4">
+                    <button type="button" onclick="closeModal()"
+                        class="mr-2 px-3 py-1 rounded bg-gray-300">Cancelar</button>
+                    <button type="submit"
+                        class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded">Guardar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- !Modal Detalles -->
+    <div id="detailsModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden">
+        <div class="bg-white p-6 rounded-xl w-full max-w-md shadow-lg relative">
+            <h2 class="text-xl font-bold mb-4">Detalles de la Empresa</h2>
+            <p><strong>RUC:</strong> <span id="detail-ruc"></span></p>
+            <p><strong>Nombre:</strong> <span id="detail-name"></span></p>
+            <p><strong>Provincia:</strong> <span id="detail-province"></span></p>
+            <p><strong>País:</strong> <span id="detail-country"></span></p>
+            <div class="flex justify-end mt-4">
+                <button onclick="closeDetails()" class="px-3 py-1 rounded bg-gray-300">Cerrar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- !Tabla -->
     <div class="bg-white shadow rounded-2xl overflow-x-auto">
         <table class="min-w-full table-auto text-sm text-gray-700">
             <thead class="bg-gray-200 text-gray-700">
@@ -17,15 +67,24 @@
                     <th class="px-4 py-2 text-left">Acciones</th>
                 </tr>
             </thead>
-            <tbody>
+            <tbody id="companyTableBody">
                 {% for company in companies %}
-                <tr class="border-t hover:bg-gray-100">
+                <tr id="empresa-{{ company.id }}" class="border-t hover:bg-gray-100">
                     <td class="px-4 py-2">{{ company.ruc }}</td>
                     <td class="px-4 py-2">{{ company.name }}</td>
                     <td class="px-4 py-2">{{ company.province.name }}</td>
                     <td class="px-4 py-2">{{ company.province.country.name }}</td>
                     <td class="px-4 py-2 space-x-2">
-                        
+                        <button onclick="showDetails({{ company.id }})"
+                            class="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-1 px-3 rounded">
+                            Detalles
+                        </button>
+                        <button class="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-1 px-3 rounded">
+                            Editar
+                        </button>
+                        <button class="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-1 px-3 rounded">
+                            Borrar
+                        </button>
                     </td>
                 </tr>
                 {% empty %}
@@ -36,5 +95,96 @@
             </tbody>
         </table>
     </div>
+
+    <!-- *Botón crear -->
+    <div class="mb-4">
+        <button onclick="openModal()" class="bg-blue-600 text-white px-4 py-2 rounded justify-center mt-4">Crear Empresa</button>
+    </div>
+
 </div>
+
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Abre el modal de creación de empresa
+    function openModal() {
+        document.getElementById('createModal').classList.remove('hidden');
+    }
+
+    // Cierra el modal de creación
+    function closeModal() {
+        document.getElementById('createModal').classList.add('hidden');
+        document.getElementById('createForm').reset();
+        clearErrors();
+    }
+
+    // Limpia los mensajes de error de los campos del formulario
+    function clearErrors() {
+        ['ruc', 'name', 'province'].forEach(field => {
+            document.getElementById('error-' + field).innerText = '';
+        });
+    }
+
+    // Muestra el modal de detalles de una empresa, obteniendo los datos por AJAX
+    function showDetails(id) {
+        fetch(`/companies/${id}/json/`)  // Debes crear esta vista en Django que devuelva los datos en JSON
+        .then(response => response.json())
+        .then(data => {
+            // Llena los campos del modal de detalles con los datos recibidos
+            document.getElementById('detail-ruc').innerText = data.ruc;
+            document.getElementById('detail-name').innerText = data.name;
+            document.getElementById('detail-province').innerText = data.province;
+            document.getElementById('detail-country').innerText = data.country;
+            // Muestra el modal de detalles
+            document.getElementById('detailsModal').classList.remove('hidden');
+        });
+    }
+
+    // Cierra el modal de detalles
+    function closeDetails() {
+        document.getElementById('detailsModal').classList.add('hidden');
+    }
+
+    // Maneja el envío del formulario de creación de empresa por AJAX
+    document.getElementById('createForm').addEventListener('submit', async function (e) {
+        e.preventDefault(); // Evita el envío tradicional del formulario
+        clearErrors(); // Limpia errores previos
+
+        const form = e.target;
+        const data = new FormData(form);
+
+        // Envía los datos del formulario por AJAX a la URL definida en Django
+        const response = await fetch("{% url 'create_company' %}", {
+            method: "POST",
+            body: data,
+        });
+
+        const result = await response.json();
+
+        if (response.ok) {
+            // Si la creación fue exitosa, agrega la nueva empresa a la tabla
+            const newRow = `
+          <tr id="empresa-${result.id}" class="border-t">
+              <td class="p-2">${result.ruc}</td>
+              <td class="p-2">${result.name}</td>
+              <td class="p-2">${result.province}</td>
+              <td class="p-2">${result.country}</td>
+              <td class="p-2 space-x-2">
+                  <button class="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-1 px-3 rounded">Detalles</button>
+                  <button class="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-1 px-3 rounded">Editar</button>
+                  <button class="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-1 px-3 rounded">Borrar</button>
+              </td>
+          </tr>`;
+            document.getElementById('companyTableBody').insertAdjacentHTML('beforeend', newRow);
+            closeModal(); // Cierra el modal de creación
+        } else {
+            // Si hay errores de validación, los muestra debajo de cada campo
+            for (const field in result.errors) {
+                document.getElementById(`error-${field}`).innerText = result.errors[field].join(', ');
+            }
+        }
+    });
+</script>
 {% endblock %}
