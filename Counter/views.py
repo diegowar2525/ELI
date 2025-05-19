@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect
 from django.http import HttpResponse
 from django.contrib.auth.decorators import login_required
-from .models import Report, Company, Province
+from .models import Report, Company
 from .forms import IndividualReportUploadForm, ZipUploadForm, CompanyForm
 from django.contrib import messages
 from django.http import JsonResponse
@@ -25,24 +25,20 @@ def companies_view(request):
     companies = (
         Company.objects.all().order_by("name")
     )
-    provinces = Province.objects.all()
     return render(
         request,
         "companies.html",
         {
-            "companies": companies,
-            "provinces": provinces,
+            "companies": companies
         },
     )
 
 
 def see_company_json(request, company_id):
-    company = Company.objects.select_related("province__country").get(id=company_id)
+    company = Company.objects.get(id=company_id)
     data = {
         "ruc": company.ruc,
-        "name": company.name,
-        "province": company.province.name,
-        "country": company.province.country.name,
+        "name": company.name
     }
     return JsonResponse(data)
 
@@ -52,7 +48,6 @@ def create_company(request):
     if request.method == "POST":
         ruc = request.POST.get("ruc")
         name = request.POST.get("name")
-        province_id = request.POST.get("province")
 
         errors = {}
 
@@ -60,26 +55,18 @@ def create_company(request):
             errors["ruc"] = ["Este campo es obligatorio."]
         if not name:
             errors["name"] = ["Este campo es obligatorio."]
-        if not province_id:
-            errors["province"] = ["Este campo es obligatorio."]
 
-        try:
-            province = Province.objects.get(id=province_id)
-        except Province.DoesNotExist:
-            errors["province"] = ["Provincia no válida."]
-            province = None
 
         if errors:
             return JsonResponse({"errors": errors}, status=400)
 
-        company = Company.objects.create(ruc=ruc, name=name, province=province)
+        company = Company.objects.create(ruc=ruc, name=name)
 
         return JsonResponse(
             {
                 "id": company.id,
                 "ruc": company.ruc,
-                "name": company.name,
-                "province": company.province.name
+                "name": company.name
             }
         )
 
@@ -92,7 +79,6 @@ def update_company(request, company_id):
         company = Company.objects.get(id=company_id)
         company.ruc = data["ruc"]
         company.name = data["name"]
-        company.province = Province.objects.get(id=data["province"])
         company.save()
         return JsonResponse({"success": True})
     except Exception as e:
@@ -115,9 +101,7 @@ def edit_company(request, id):
                 {
                     "id": company.id,
                     "ruc": company.ruc,
-                    "name": company.name,
-                    "province": company.province.name,
-                    "country": company.province.country.name,
+                    "name": company.name
                 }
             )
         else:
@@ -125,20 +109,48 @@ def edit_company(request, id):
     return JsonResponse({"error": "Método no permitido"}, status=405)
 
 
+@login_required
 def reports_view(request):
-    reports = Report.objects.all().order_by("upload_date")
-    return render(request, "reports.html", {"reports": reports})
+    reports = Report.objects.select_related('company').all()
+    companies = Company.objects.all()
+    return render(request, "reports.html", {
+        "reports": reports,
+        "companies": companies,
+    })
+
 
 
 def see_report_json(request, report_id):
     report = Report.objects.get(id=report_id)
     data = {
-        "company": report.company.name,
+        "id": report.id,
+        "name": report.name,
         "year": report.year,
-        "file": report.file.url,
+        "company": {
+            "id": report.company.id,
+            "name": report.company.name,
+        },
         "upload_date": report.upload_date.strftime("%Y-%m-%d"),
     }
     return JsonResponse(data)
+
+
+def delete_report(request, report_id):
+    Report.objects.filter(id=report_id).delete()
+    return HttpResponse(status=204)
+
+
+def update_report(request, report_id):
+    data = json.loads(request.body)
+    try:
+        report = Report.objects.get(id=report_id)
+        report.name = data["name"]
+        report.year = data["year"]
+        report.company = Company.objects.get(id=data["company"])
+        report.save()
+        return JsonResponse({"success": True})
+    except Exception as e:
+        return JsonResponse({"success": False, "error": str(e)}, status=400)
 
 
 def totalcount_view(request):
