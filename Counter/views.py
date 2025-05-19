@@ -1,4 +1,5 @@
 from django.shortcuts import render, redirect
+from django.http import HttpResponse
 from django.contrib.auth.decorators import login_required
 from .models import Report, Company, Province
 from .forms import IndividualReportUploadForm, ZipUploadForm, CompanyForm
@@ -7,6 +8,7 @@ from django.http import JsonResponse
 import os
 from django.conf import settings
 from django.views.decorators.csrf import csrf_exempt
+import json
 
 
 # Create your views here.
@@ -32,6 +34,17 @@ def companies_view(request):
             "provinces": provinces,
         },
     )
+
+
+def see_company_json(request, company_id):
+    company = Company.objects.select_related("province__country").get(id=company_id)
+    data = {
+        "ruc": company.ruc,
+        "name": company.name,
+        "province": company.province.name,
+        "country": company.province.country.name,
+    }
+    return JsonResponse(data)
 
 
 @csrf_exempt
@@ -74,15 +87,22 @@ def create_company(request):
     return JsonResponse({"error": "Método no permitido"}, status=405)
 
 
-def see_company_json(request, company_id):
-    company = Company.objects.select_related('province__country').get(id=company_id)
-    data = {
-        'ruc': company.ruc,
-        'name': company.name,
-        'province': company.province.name,
-        'country': company.province.country.name
-    }
-    return JsonResponse(data)
+def update_company(request, company_id):
+    data = json.loads(request.body)
+    try:
+        company = Company.objects.get(id=company_id)
+        company.ruc = data["ruc"]
+        company.name = data["name"]
+        company.province = Province.objects.get(id=data["province"])
+        company.save()
+        return JsonResponse({"success": True})
+    except Exception as e:
+        return JsonResponse({"success": False, "error": str(e)}, status=400)
+
+
+def delete_company(request, company_id):
+    Company.objects.filter(id=company_id).delete()
+    return HttpResponse(status=204)
 
 
 @csrf_exempt
@@ -109,6 +129,17 @@ def edit_company(request, id):
 def reports_view(request):
     reports = Report.objects.all().order_by("upload_date")
     return render(request, "reports.html", {"reports": reports})
+
+
+def see_report_json(request, report_id):
+    report = Report.objects.get(id=report_id)
+    data = {
+        "company": report.company.name,
+        "year": report.year,
+        "file": report.file.url,
+        "upload_date": report.upload_date.strftime("%Y-%m-%d"),
+    }
+    return JsonResponse(data)
 
 
 def totalcount_view(request):

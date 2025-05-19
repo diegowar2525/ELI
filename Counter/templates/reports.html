@@ -4,15 +4,37 @@
 
 {% block content %}
 <div class="container mx-auto px-4">
+        <!-- !Botón para volver al panel -->
+    <div class="mb-4">
+        <a href="{% url 'panel' %}" class="inline-block bg-blue-200 hover:bg-gray-300 text-gray-800 font-semibold py-2 px-4 rounded shadow">
+            Volver al panel de administración
+        </a>
+    </div>
+
     <h1 class="text-3xl font-bold mb-6">Lista de Reportes</h1>
 
+    <!-- !Modal Detalles reporte-->
+    <div id="detailsModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden">
+        <div class="bg-white p-6 rounded-xl w-full max-w-md shadow-lg relative">
+            <h2 class="text-xl font-bold mb-4">Detalles del reporte</h2>
+            <p><strong>Id:</strong> <span id="???????????????"></span></p>
+            <p><strong>Nombre:</strong> <span id="???????????????"></span></p>
+            <p><strong>Fecha:</strong> <span id="???????????????"></span></p>
+            <p><strong>Empresa:</strong> <span id="???????????????"></span></p>
+            <div class="flex justify-end mt-4">
+                <button onclick="closeModal()" class="px-3 py-1 rounded bg-gray-300">Cerrar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- !Tabla -->
     <div class="bg-white shadow rounded-2xl overflow-x-auto">
         <table class="min-w-full table-auto text-sm text-gray-700">
             <thead class="bg-gray-200 text-gray-700">
                 <tr>
                     <th class="px-4 py-2 text-left">ID</th>
-                    <th class="px-4 py-2 text-left">Título</th>
-                    <th class="px-4 py-2 text-left">Fecha</th>
+                    <th class="px-4 py-2 text-left">Nombre</th>
+                    <th class="px-4 py-2 text-left">Año</th>
                     <th class="px-4 py-2 text-left">Empresa</th>
                     <th class="px-4 py-2 text-left">Acciones</th>
                 </tr>
@@ -20,19 +42,22 @@
             <tbody>
                 {% for report in reports %}
                 <tr class="border-t hover:bg-gray-100">
-                    <td class="px-4 py-2">{{ reporte.id }}</td>
-                    <td class="px-4 py-2">{{ reporte.titulo }}</td>
-                    <td class="px-4 py-2">{{ reporte.fecha_creacion }}</td>
-                    <td class="px-4 py-2">{{ reporte.empresa.nombre }}</td>
+                    <td class="px-4 py-2">{{ report.id }}</td>
+                    <td class="px-4 py-2">{{ report.name }}</td>
+                    <td class="px-4 py-2">{{ report.year }}</td>
+                    <td class="px-4 py-2">{{ report.company.name }}</td>
                     <td class="px-4 py-2">
-                        {% if reporte %}
-                            <button class="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-1 px-3 rounded">
+                        {% if report %}
+                            <button onclick="showDetails({{ report.id }})"
+                                class="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-1 px-3 rounded">
                                 Detalles
                             </button>
-                            <button class="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-1 px-3 rounded">
+                            <button onclick="openEditModal({{ report.id }})"
+                                    class="bg-yellow-500 hover:bg-yellow-600 text-white font-semibold py-1 px-3 rounded">
                                 Editar
                             </button>
-                            <button class="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-1 px-3 rounded">
+                            <button onclick="openDeleteModal({{ report.id }})"
+                                    class="bg-red-500 hover:bg-red-600 text-white font-semibold py-1 px-3 rounded">
                                 Borrar
                             </button>
                         {% endif %}
@@ -46,6 +71,21 @@
             </tbody>
         </table>
     </div>
+    <!-- *Botón crear -->
+    <div class="mb-4">
+        <a href="{% url 'upload' %}">
+            <button class="bg-green-500 hover:bg-green-600 text-white font-semibold py-2 px-4 rounded justify-center mt-4">
+            Subir Reporte
+            </button>
+        </a>
+    </div>
 </div>
+
 {% endblock %}
 
+{% block scripts %}
+
+{% load static %}
+<script src="{% static 'js/reports.js' %}"></script>
+
+{% endblock %}

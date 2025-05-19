@@ -5,12 +5,13 @@ from .models import Report, Company
 class IndividualReportUploadForm(forms.ModelForm):
     class Meta:
         model = Report
-        fields = ["company", "year", "file"]
+        fields = ["company", "year", "name", "file"]
         widgets = {
             "company": forms.Select(attrs={"class": "border rounded px-2 py-1"}),
             "year": forms.NumberInput(
                 attrs={"min": 2000, "max": 2100, "class": "border rounded px-2 py-1"}
             ),
+            "name": forms.TextInput(attrs={"class": "border rounded px-2 py-1"}),
             "file": forms.ClearableFileInput(
                 attrs={"class": "border rounded px-2 py-1"}
             ),
