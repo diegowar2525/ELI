@@ -85,7 +85,6 @@
             <p><strong>RUC:</strong> <span id="detail-ruc"></span></p>
             <p><strong>Nombre:</strong> <span id="detail-name"></span></p>
             <p><strong>Provincia:</strong> <span id="detail-province"></span></p>
-            <p><strong>País:</strong> <span id="detail-country"></span></p>
             <div class="flex justify-end mt-4">
                 <button onclick="closeDetails()" class="px-3 py-1 rounded bg-gray-300">Cerrar</button>
             </div>
@@ -113,7 +112,6 @@
                     <th class="px-4 py-2 text-left">RUC</th>
                     <th class="px-4 py-2 text-left">Nombre</th>
                     <th class="px-4 py-2 text-left">Provincia</th>
-                    <th class="px-4 py-2 text-left">País</th>
                     <th class="px-4 py-2 text-left">Acciones</th>
                 </tr>
             </thead>
@@ -123,7 +121,6 @@
                     <td class="px-4 py-2">{{ company.ruc }}</td>
                     <td class="px-4 py-2">{{ company.name }}</td>
                     <td class="px-4 py-2">{{ company.province.name }}</td>
-                    <td class="px-4 py-2">{{ company.province.country.name }}</td>
                     <td class="px-4 py-2 space-x-2">
                         <button onclick="showDetails({{ company.id }})"
                             class="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-1 px-3 rounded">

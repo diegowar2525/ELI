@@ -23,9 +23,9 @@ def panel_view(request):
 
 def companies_view(request):
     companies = (
-        Company.objects.select_related("province__country").all().order_by("name")
+        Company.objects.all().order_by("name")
     )
-    provinces = Province.objects.select_related("country").all()
+    provinces = Province.objects.all()
     return render(
         request,
         "companies.html",
@@ -79,8 +79,7 @@ def create_company(request):
                 "id": company.id,
                 "ruc": company.ruc,
                 "name": company.name,
-                "province": company.province.name,
-                "country": company.province.country.name,
+                "province": company.province.name
             }
         )
 
