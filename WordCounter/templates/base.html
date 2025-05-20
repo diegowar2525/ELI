@@ -1,44 +1,59 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <title>{% block title %}WordCounter{% endblock %}</title>
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
 </head>
+
 <body class="bg-gray-100 text-gray-900">
 
-    <!-- Navegación -->
-    <nav class="bg-white shadow-md">
-        <div class="container mx-auto px-4 py-4 flex justify-between items-center">
-            <a href="{% url 'index' %}" class="text-xl font-bold text-blue-600">WordCounter</a>
-            <ul class="flex space-x-6">
-                <li><a href="{% url 'index' %}" class="text-gray-700 hover:text-blue-600">Inicio</a></li>
-                {% if user.is_authenticated %}
+    <body class="bg-gray-100 text-gray-900 flex flex-col min-h-screen">
+
+        <!-- Navegación -->
+        <nav class="bg-white shadow-md">
+            <div class="container mx-auto px-4 py-4 flex justify-between items-center">
+                <a href="{% url 'index' %}" class="text-xl font-bold text-blue-600">WordCounter</a>
+                <ul class="flex space-x-6">
                     <li>
-                        <form action="{% url 'logout' %}" method="post"> <!-- !Método POST obligatorio-->
+                        {% if user.is_authenticated %}
+                            <div class="text-gray-700 mr-6 font-medium">
+                                ¡Bienvenido, <span class="font-bold text-blue-600">{{ user.username }}!</span>
+                            </div>
+                        {% endif %}
+                    </li>
+                    {% if user.is_authenticated %}
+                    <li>
+                        <form action="{% url 'logout' %}" method="post">
                             {% csrf_token %}
-                            <button type="submit" class="text-red-600 hover:underline bg-transparent border-none cursor-pointer">Cerrar sesión</button>
+                            <button type="submit"
+                                class="text-red-600 hover:underline bg-transparent border-none cursor-pointer">Cerrar
+                                sesión</button>
                         </form>
                     </li>
-                    <li><a href="{% url 'panel' %}" class="text-gray-700 hover:text-blue-600">Panel de administración</a></li>
-                {% else %}
+                    <li><a href="{% url 'panel' %}" class="text-gray-700 hover:text-blue-600">Panel de
+                            administración</a></li>
+                    {% else %}
                     <li><a href="{% url 'login' %}" class="text-gray-700 hover:text-blue-600">Iniciar sesión</a></li>
                     <li><a href="{% url 'register' %}" class="text-gray-700 hover:text-blue-600">Registrarse</a></li>
-                {% endif %}
-            </ul>
-        </div>
-    </nav>
+                    {% endif %}
+                </ul>
+            </div>
+        </nav>
 
-    <main class="container mx-auto py-8">
-        {% block content %}
-        
-        {% endblock %}
-    </main>
+        <!-- Contenido principal -->
+        <main class="container mx-auto py-8 flex-grow">
+            {% block content %}{% endblock %}
+        </main>
 
-    <footer class="bg-gray-200 text-center py-4">
-        © 2025 WordCounter. Todos los derechos reservados.
-    </footer>
-</body>
+        <!-- Footer fijo abajo -->
+        <footer class="bg-gray-200 text-center py-4">
+            © 2025 WordCounter. Todos los derechos reservados.
+        </footer>
+
+    </body>
+
 </html>
 
 {% block scripts %}

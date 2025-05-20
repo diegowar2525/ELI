@@ -4,37 +4,56 @@
 
 {% block content %}
 <div class="container mx-auto px-4">
-    <h1 class="text-3xl font-bold mb-6">Panel de Administración</h1>
+    <h1 class="text-4xl font-bold mb-10 text-center text-gray-800">Panel de Administración</h1>
 
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
         <!-- Empresas -->
-        <div class="bg-white p-6 rounded-2xl shadow">
-            <h2 class="text-xl font-semibold mb-2">Empresas</h2>
-            <p class="text-gray-600 mb-4">Administra las empresas registradas en el sistema.</p>
-            <a href="{% url 'companies' %}" class="inline-block bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 transition">Gestionar empresas</a>
+        <div class="bg-gradient-to-br from-green-100 to-green-200 p-6 rounded-2xl shadow-md hover:shadow-xl transform hover:-translate-y-1 transition duration-300">
+            <div class="mb-4">
+                <svg class="w-8 h-8 text-green-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path d="M9 17v-6h13v6M9 17V5H5v12h4zM9 17h13M5 5h4v4H5z" />
+                </svg>
+            </div>
+            <h2 class="text-xl font-semibold mb-2 text-green-800">Empresas</h2>
+            <p class="text-gray-700 mb-4">Administra las empresas registradas.</p>
+            <a href="{% url 'companies' %}" class="inline-block bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 transition">Gestionar</a>
         </div>
 
         <!-- Reportes -->
-        <div class="bg-white p-6 rounded-2xl shadow">
-            <h2 class="text-xl font-semibold mb-2">Reportes</h2>
-            <p class="text-gray-600 mb-4">Consulta y gestiona los reportes generados.</p>
-            <a href="{% url 'reports' %}" class="inline-block bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition">Gestionar reportes</a>
+        <div class="bg-gradient-to-br from-blue-100 to-blue-200 p-6 rounded-2xl shadow-md hover:shadow-xl transform hover:-translate-y-1 transition duration-300">
+            <div class="mb-4">
+                <svg class="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path d="M3 7h18M3 12h18M3 17h18" />
+                </svg>
+            </div>
+            <h2 class="text-xl font-semibold mb-2 text-blue-800">Reportes</h2>
+            <p class="text-gray-700 mb-4">Consulta y gestiona los reportes generados.</p>
+            <a href="{% url 'reports' %}" class="inline-block bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition">Gestionar</a>
         </div>
 
-        <!-- Total conteo -->
-        <div class="bg-white p-6 rounded-2xl shadow">
-            <h2 class="text-xl font-semibold mb-2">Total de Palabras</h2>
-            <p class="text-gray-600 mb-4">Consulta el total acumulado de palabras procesadas.</p>
-            <div class="text-3xl font-bold text-purple-700">{{ total_palabras }}</div>
-            <a href="{% url 'totalcount' %}" class="inline-block bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition">Ver el conteo total</a>
+        <!-- Conteo total -->
+        <div class="bg-gradient-to-br from-purple-100 to-purple-200 p-6 rounded-2xl shadow-md hover:shadow-xl transform hover:-translate-y-1 transition duration-300">
+            <div class="mb-4">
+                <svg class="w-8 h-8 text-purple-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path d="M11 17l-5-5m0 0l5-5m-5 5h12" />
+                </svg>
+            </div>
+            <h2 class="text-xl font-semibold mb-2 text-purple-800">Total de Palabras</h2>
+            <p class="text-gray-700 mb-4">Total acumulado de palabras procesadas:</p>
+            <div class="text-3xl font-bold text-purple-700 mb-4">{{ total_palabras }}</div>
+            <a href="{% url 'totalcount' %}" class="inline-block bg-purple-500 text-white px-4 py-2 rounded hover:bg-purple-600 transition">Ver conteo</a>
         </div>
 
         <!-- Subir reportes -->
-        <div class="bg-white p-6 rounded-2xl shadow">
-            <h2 class="text-xl font-semibold mb-2">Subir reportes</h2>
-            <p class="text-gray-600 mb-4">Sube un reporte para procesarlo.</p>
-            <div class="text-3xl font-bold text-purple-700">{{ subir_reporte }}</div>
-            <a href="{% url 'upload' %}" class="inline-block bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition">Subir reportes</a>
+        <div class="bg-gradient-to-br from-yellow-100 to-yellow-200 p-6 rounded-2xl shadow-md hover:shadow-xl transform hover:-translate-y-1 transition duration-300">
+            <div class="mb-4">
+                <svg class="w-8 h-8 text-yellow-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path d="M4 4v16h16V4H4zm4 8h8m-4-4v8" />
+                </svg>
+            </div>
+            <h2 class="text-xl font-semibold mb-2 text-yellow-800">Subir Reportes</h2>
+            <p class="text-gray-700 mb-4">Carga un nuevo reporte al sistema.</p>
+            <a href="{% url 'upload' %}" class="inline-block bg-yellow-500 text-white px-4 py-2 rounded hover:bg-yellow-600 transition">Subir</a>
         </div>
     </div>
 </div>

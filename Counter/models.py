@@ -1,4 +1,5 @@
 from django.db import models
+from django.db.models import JSONField
 
 # Create your models here.
 
@@ -7,7 +8,7 @@ class Province(models.Model):
     name = models.CharField(max_length=100)
 
     def __str__(self):
-        return f"{self.name}, {self.country.name}" if self.country else self.name
+        return f"{self.name}"
 
 
 class Company(models.Model):
@@ -18,7 +19,7 @@ class Company(models.Model):
     name = models.CharField(max_length=255)
 
     def __str__(self):
-        return f"{self.name}"
+        return f"{self.name} - {self.ruc}"
 
 
 class Report(models.Model):
@@ -29,16 +30,14 @@ class Report(models.Model):
     upload_date = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f"Reporte {self.year} - {self.company.name}"
+        return f"Reporte {self.year} - {self.name}"
 
 
 class TotalCount(models.Model):
-    company = models.ForeignKey(Company, on_delete=models.CASCADE)
     report = models.ForeignKey(Report, on_delete=models.CASCADE)
-    year = models.PositiveIntegerField()
     word = models.CharField(max_length=100)
     quantity = models.PositiveIntegerField()
 
     def __str__(self):
-        return f"{self.word} ({self.quantity}) - {self.company.name} ({self.year})"
+        return f"{self.word} - {self.quantity}"
 

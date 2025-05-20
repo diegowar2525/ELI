@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect
 from django.http import HttpResponse
 from django.contrib.auth.decorators import login_required
-from .models import Report, Company
+from .models import Report, Company, Province
 from .forms import IndividualReportUploadForm, ZipUploadForm, CompanyForm
 from django.contrib import messages
 from django.http import JsonResponse
@@ -22,24 +22,21 @@ def panel_view(request):
 
 
 def companies_view(request):
-    companies = (
-        Company.objects.all().order_by("name")
-    )
+    companies = Company.objects.all()
+    provinces = Province.objects.all()
     return render(
         request,
         "companies.html",
         {
-            "companies": companies
+            "companies": companies,
+            "provinces": provinces,
         },
     )
 
 
 def see_company_json(request, company_id):
     company = Company.objects.get(id=company_id)
-    data = {
-        "ruc": company.ruc,
-        "name": company.name
-    }
+    data = {"ruc": company.ruc, "name": company.name}
     return JsonResponse(data)
 
 
@@ -48,7 +45,6 @@ def create_company(request):
     if request.method == "POST":
         ruc = request.POST.get("ruc")
         name = request.POST.get("name")
-
         errors = {}
 
         if not ruc:
@@ -56,18 +52,13 @@ def create_company(request):
         if not name:
             errors["name"] = ["Este campo es obligatorio."]
 
-
         if errors:
             return JsonResponse({"errors": errors}, status=400)
 
         company = Company.objects.create(ruc=ruc, name=name)
 
         return JsonResponse(
-            {
-                "id": company.id,
-                "ruc": company.ruc,
-                "name": company.name
-            }
+            {"id": company.id, "ruc": company.ruc, "name": company.name}
         )
 
     return JsonResponse({"error": "Método no permitido"}, status=405)
@@ -98,11 +89,7 @@ def edit_company(request, id):
         if form.is_valid():
             company = form.save()
             return JsonResponse(
-                {
-                    "id": company.id,
-                    "ruc": company.ruc,
-                    "name": company.name
-                }
+                {"id": company.id, "ruc": company.ruc, "name": company.name}
             )
         else:
             return JsonResponse({"errors": form.errors}, status=400)
@@ -111,13 +98,16 @@ def edit_company(request, id):
 
 @login_required
 def reports_view(request):
-    reports = Report.objects.select_related('company').all()
+    reports = Report.objects.select_related("company").all()
     companies = Company.objects.all()
-    return render(request, "reports.html", {
-        "reports": reports,
-        "companies": companies,
-    })
-
+    return render(
+        request,
+        "reports.html",
+        {
+            "reports": reports,
+            "companies": companies,
+        },
+    )
 
 
 def see_report_json(request, report_id):
