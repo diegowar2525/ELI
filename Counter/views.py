@@ -107,7 +107,6 @@ def totalcount_view(request):
 @login_required
 def see_company_json(request, company_id):
     company = Company.objects.get(id=company_id)
-    province = Province.objects.get(id=company.province.id)
     data = {"ruc": company.ruc, "name": company.name, "province": company.province.name}
     return JsonResponse(data)
 
@@ -148,36 +147,34 @@ def create_company(request):
 
 
 @login_required
-def update_company(request, company_id):
-    data = json.loads(request.body)
-    try:
-        company = Company.objects.get(id=company_id)
-        company.ruc = data["ruc"]
-        company.name = data["name"]
-        company.save()
-        return JsonResponse({"success": True})
-    except Exception as e:
-        return JsonResponse({"success": False, "error": str(e)}, status=400)
-
-@login_required
 def delete_company(request, company_id):
     Company.objects.filter(id=company_id).delete()
     return HttpResponse(status=204)
 
 
 @csrf_exempt
-def edit_company(request, id):
-    company = Company.objects.get(id=id)
-    if request.method == "POST":
-        form = CompanyForm(request.POST, instance=company)
-        if form.is_valid():
-            company = form.save()
-            return JsonResponse(
-                {"id": company.id, "ruc": company.ruc, "name": company.name}
-            )
-        else:
-            return JsonResponse({"errors": form.errors}, status=400)
-    return JsonResponse({"error": "Método no permitido"}, status=405)
+def update_company(request, company_id):
+    company = Company.objects.get(id=company_id)
+    data = json.loads(request.body)
+
+    ruc = data.get('ruc')
+    name = data.get('name')
+    province_id = data.get('province')
+
+    if not (ruc and name and province_id):
+        return JsonResponse({"error": "Faltan datos"}, status=400)
+
+    try:
+        province = Province.objects.get(id=province_id)
+    except Province.DoesNotExist:
+        return JsonResponse({"error": "Provincia inválida"}, status=400)
+
+    company.ruc = ruc
+    company.name = name
+    company.province = province
+    company.save()
+
+    return JsonResponse({"success": True})
 
 
 #* ---------------------------------------- CRUD REPORT  ----------------------------------------
