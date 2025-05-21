@@ -1,86 +1,102 @@
 {% extends "base.html" %}
 {% load static %}
 
-{% block title %}Subir Reportes | WordCounter{% endblock %}
+{% block title %}Subir Reportes | ELI{% endblock %}
 
 {% block content %}
-<div class="container mx-auto px-4 max-w-3xl">
-        <!-- !Botón para volver al panel -->
-    <div class="mb-4">
-        <a href="{% url 'panel' %}" class="inline-block bg-blue-200 hover:bg-gray-300 text-gray-800 font-semibold py-2 px-4 rounded shadow">
-            Volver al panel de administración
+<div class="container mx-auto px-6 max-w-3xl py-8">
+    <!-- Botón para volver al panel -->
+    <div class="mb-6">
+        <a href="{% url 'panel' %}"
+           class="inline-block bg-blue-100 hover:bg-blue-200 text-blue-800 font-semibold py-2 px-5 rounded-lg shadow transition">
+            ← Volver al panel de administración
         </a>
     </div>
 
-    <h1 class="text-3xl font-bold mb-6">Subida de Reportes</h1>
+    <h1 class="text-4xl font-extrabold mb-8 text-gray-900">Subida de Reportes</h1>
 
     {% if messages %}
-        <div class="mb-6">
-            {% for message in messages %}
-                <div class="p-4 rounded-lg 
-                            {% if message.tags == 'success' %}
-                                bg-green-100 text-green-800
-                            {% elif message.tags == 'error' %}
-                                bg-red-100 text-red-800
-                            {% else %}
-                                bg-gray-100 text-gray-800
-                            {% endif %}">
-                    {{ message }}
-                </div>
-            {% endfor %}
+    <div class="mb-8 space-y-3">
+        {% for message in messages %}
+        <div class="p-4 rounded-lg
+                    {% if message.tags == 'success' %}
+                        bg-green-50 text-green-800 border border-green-200
+                    {% elif message.tags == 'error' %}
+                        bg-red-50 text-red-800 border border-red-200
+                    {% else %}
+                        bg-gray-50 text-gray-700 border border-gray-200
+                    {% endif %}">
+            {{ message }}
         </div>
+        {% endfor %}
+    </div>
     {% endif %}
 
-    <!-- *Formulario individual -->
-    <div class="bg-white p-6 rounded-2xl shadow mb-8">
-        <h2 class="text-xl font-semibold mb-4">Subir Reporte Individual</h2>
-        <form method="post" enctype="multipart/form-data">
+    <!-- Formulario individual -->
+    <section class="bg-white p-8 rounded-3xl shadow-lg mb-10">
+        <h2 class="text-2xl font-semibold mb-6 text-gray-800 border-b pb-2">Subir Reporte Individual</h2>
+        <form method="post" enctype="multipart/form-data" novalidate>
             {% csrf_token %}
-            <div class="mb-4">
-                <label class="block mb-1 font-medium">Empresa</label>
-                {{ individual_form.company }}
-            </div>
-            <div class="mb-4">
-                <label class="block mb-1 font-medium">Año</label>
-                {{ individual_form.year }}
-            </div>
-            <div class="mb-4">
-                <label class="block mb-1 font-medium">Nombre</label>
-                {{ individual_form.name }}
-            </div>
-            <div class="mb-4">
-                <label class="block mb-1 font-medium">Archivo</label>
-                {{ individual_form.file }}
-            </div>
-            <button type="submit" name="upload_individual"
-                class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition">
-                Subir Individual
-            </button>
-        </form>
-    </div>
-
-    <!-- *Formulario ZIP -->
-    <div class="bg-white p-6 rounded-2xl shadow">
-        <h2 class="text-xl font-semibold mb-4">Subir Múltiples Reportes (ZIP)</h2>
-        <form method="post" enctype="multipart/form-data">
-            {% csrf_token %}
-            <div class="mb-4">
-                <label class="block mb-1 font-medium">Empresa</label>
-                <select name="zip_company" class="border rounded px-2 py-1 w-full">
+            <div class="mb-5">
+                <label for="companySelect" class="block mb-2 font-medium text-gray-700">Empresa</label>
+                <select name="{{ individual_form.company.name }}" id="companySelect" required
+                    class="w-full rounded-md border border-gray-300 px-3 py-2 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
                     {% for company in companies %}
-                        <option value="{{ company.id }}">{{ company.name }}</option>
+                    <option value="{{ company.id }}" {% if individual_form.company.value == company.id|stringformat:"s" %}selected{% endif %}>
+                        {{ company.name }}
+                    </option>
                     {% endfor %}
                 </select>
             </div>
-            <div class="mb-4">
-                <label class="block mb-1 font-medium">Archivo ZIP</label>
-                <input type="file" name="zip_file" accept=".zip" class="border rounded px-2 py-1 w-full">
+
+            <div class="mb-5">
+                <label for="{{ individual_form.year.id_for_label }}" class="block mb-2 font-medium text-gray-700">Año</label>
+                {{ individual_form.year }}
             </div>
+
+            <div class="mb-5">
+                <label for="{{ individual_form.name.id_for_label }}" class="block mb-2 font-medium text-gray-700">Nombre</label>
+                {{ individual_form.name }}
+            </div>
+
+            <div class="mb-6">
+                <label for="{{ individual_form.file.id_for_label }}" class="block mb-2 font-medium text-gray-700">Archivo</label>
+                {{ individual_form.file }}
+            </div>
+
+            <button type="submit" name="upload_individual"
+                class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded-lg shadow-md transition">
+                Subir Individual
+            </button>
+        </form>
+    </section>
+
+    <!-- Formulario ZIP -->
+    <section class="bg-white p-8 rounded-3xl shadow-lg">
+        <h2 class="text-2xl font-semibold mb-6 text-gray-800 border-b pb-2">Subir Múltiples Reportes (ZIP)</h2>
+        <form method="post" enctype="multipart/form-data" novalidate>
+            {% csrf_token %}
+            <div class="mb-5">
+                <label for="zip_company" class="block mb-2 font-medium text-gray-700">Empresa</label>
+                <select name="zip_company" id="zip_company"
+                    class="w-full rounded-md border border-gray-300 px-3 py-2 text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-500">
+                    {% for company in companies %}
+                    <option value="{{ company.id }}">{{ company.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="mb-6">
+                <label for="zip_file" class="block mb-2 font-medium text-gray-700">Archivo ZIP</label>
+                <input type="file" name="zip_file" id="zip_file" accept=".zip"
+                    class="w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500" />
+            </div>
+
             <button type="submit" name="upload_zip"
-                class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 transition">
+                class="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-3 rounded-lg shadow-md transition">
                 Subir ZIP
             </button>
         </form>
-    </div>
+    </section>
 </div>
 {% endblock %}

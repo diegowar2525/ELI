@@ -34,10 +34,21 @@ class Report(models.Model):
 
 
 class TotalCount(models.Model):
-    report = models.ForeignKey(Report, on_delete=models.CASCADE)
+    year = models.PositiveIntegerField()
     word = models.CharField(max_length=100)
     quantity = models.PositiveIntegerField()
 
     def __str__(self):
         return f"{self.word} - {self.quantity}"
 
+
+class TotalCountReport(models.Model):
+    report = models.ForeignKey(Report, on_delete=models.CASCADE)
+    word = models.CharField(max_length=100)
+    quantity = models.PositiveIntegerField()
+
+    class Meta:
+        unique_together = ('report', 'word')
+    
+    def __str__(self):
+        return f"{self.word} - {self.quantity}"

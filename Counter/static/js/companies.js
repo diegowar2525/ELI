@@ -1,4 +1,4 @@
-// -------------------- UTILIDADES --------------------
+// ---------------------------------------- UTILIDADES ----------------------------------------
 // Obtiene el valor de una cookie por nombre (para CSRF)
 function getCookie(name) {
     let cookieValue = null;
@@ -24,7 +24,7 @@ function clearErrors() {
     });
 }
 
-// -------------------- CREACIÓN --------------------
+// ---------------------------------------- CREACIÓN ----------------------------------------
 // Abre el modal de creación
 function openCreateModal() {
     document.getElementById('createModal').classList.remove('hidden');
@@ -89,7 +89,7 @@ function hideNoCompaniesMessage() {
     if (msg) msg.style.display = 'none';
 }
 
-// -------------------- DETALLES --------------------
+// ---------------------------------------- DETALLES ----------------------------------------
 // Muestra el modal de detalles de una empresa
 function showDetails(id) {
     fetch(`/companies/${id}/json/`)
@@ -107,7 +107,7 @@ function closeDetailsModal() {
     document.getElementById('detailsModal').classList.add('hidden');
 }
 
-// -------------------- EDICIÓN --------------------
+// ---------------------------------------- EDICIÓN ----------------------------------------
 // Abre el modal de edición y llena los campos con los datos actuales
 function openEditModal(id) {
     fetch(`/companies/${id}/json/`)
@@ -149,7 +149,7 @@ function submitEditForm(event) {
     });
 }
 
-// -------------------- ELIMINACIÓN --------------------
+// ---------------------------------------- ELIMINACIÓN ----------------------------------------
 let companyToDelete = null;
 
 // Abre el modal de confirmación de borrado
@@ -191,7 +191,7 @@ function showNoCompaniesMessage() {
     if (msg) msg.style.display = '';
 }
 
-// -------------------- EVENT DELEGATION --------------------
+// ---------------------------------------- EVENT DELEGATION ----------------------------------------
 // Delegación de eventos para los botones de la tabla
 document.addEventListener('click', function (e) {
     if (e.target.classList.contains('btn-details')) {

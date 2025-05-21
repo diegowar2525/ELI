@@ -11,7 +11,8 @@ from django.views.decorators.csrf import csrf_exempt
 import json
 
 
-# Create your views here.
+#* ---------------------------------------- VISTAS GENERALES ----------------------------------------
+
 def index_view(request):
     return render(request, "index.html")
 
@@ -21,6 +22,7 @@ def panel_view(request):
     return render(request, "panel.html")
 
 
+@login_required
 def companies_view(request):
     companies = Company.objects.all()
     provinces = Province.objects.all()
@@ -32,68 +34,6 @@ def companies_view(request):
             "provinces": provinces,
         },
     )
-
-
-def see_company_json(request, company_id):
-    company = Company.objects.get(id=company_id)
-    data = {"ruc": company.ruc, "name": company.name}
-    return JsonResponse(data)
-
-
-@csrf_exempt
-def create_company(request):
-    if request.method == "POST":
-        ruc = request.POST.get("ruc")
-        name = request.POST.get("name")
-        errors = {}
-
-        if not ruc:
-            errors["ruc"] = ["Este campo es obligatorio."]
-        if not name:
-            errors["name"] = ["Este campo es obligatorio."]
-
-        if errors:
-            return JsonResponse({"errors": errors}, status=400)
-
-        company = Company.objects.create(ruc=ruc, name=name)
-
-        return JsonResponse(
-            {"id": company.id, "ruc": company.ruc, "name": company.name}
-        )
-
-    return JsonResponse({"error": "Método no permitido"}, status=405)
-
-
-def update_company(request, company_id):
-    data = json.loads(request.body)
-    try:
-        company = Company.objects.get(id=company_id)
-        company.ruc = data["ruc"]
-        company.name = data["name"]
-        company.save()
-        return JsonResponse({"success": True})
-    except Exception as e:
-        return JsonResponse({"success": False, "error": str(e)}, status=400)
-
-
-def delete_company(request, company_id):
-    Company.objects.filter(id=company_id).delete()
-    return HttpResponse(status=204)
-
-
-@csrf_exempt
-def edit_company(request, id):
-    company = Company.objects.get(id=id)
-    if request.method == "POST":
-        form = CompanyForm(request.POST, instance=company)
-        if form.is_valid():
-            company = form.save()
-            return JsonResponse(
-                {"id": company.id, "ruc": company.ruc, "name": company.name}
-            )
-        else:
-            return JsonResponse({"errors": form.errors}, status=400)
-    return JsonResponse({"error": "Método no permitido"}, status=405)
 
 
 @login_required
@@ -110,43 +50,7 @@ def reports_view(request):
     )
 
 
-def see_report_json(request, report_id):
-    report = Report.objects.get(id=report_id)
-    data = {
-        "id": report.id,
-        "name": report.name,
-        "year": report.year,
-        "company": {
-            "id": report.company.id,
-            "name": report.company.name,
-        },
-        "upload_date": report.upload_date.strftime("%Y-%m-%d"),
-    }
-    return JsonResponse(data)
-
-
-def delete_report(request, report_id):
-    Report.objects.filter(id=report_id).delete()
-    return HttpResponse(status=204)
-
-
-def update_report(request, report_id):
-    data = json.loads(request.body)
-    try:
-        report = Report.objects.get(id=report_id)
-        report.name = data["name"]
-        report.year = data["year"]
-        report.company = Company.objects.get(id=data["company"])
-        report.save()
-        return JsonResponse({"success": True})
-    except Exception as e:
-        return JsonResponse({"success": False, "error": str(e)}, status=400)
-
-
-def totalcount_view(request):
-    return render(request, "totalcount.html")
-
-
+@login_required
 def upload_view(request):
     individual_form = IndividualReportUploadForm()
     zip_form = ZipUploadForm()
@@ -185,3 +89,119 @@ def upload_view(request):
             "companies": companies,
         },
     )
+
+
+@login_required
+def totalcount_view(request):
+    return render(request, "totalcount.html")
+
+
+#* ---------------------------------------- CRUD COMPANIES  ----------------------------------------
+@login_required
+def see_company_json(request, company_id):
+    company = Company.objects.get(id=company_id)
+    data = {"ruc": company.ruc, "name": company.name}
+    return JsonResponse(data)
+
+
+@csrf_exempt
+def create_company(request):
+    if request.method == "POST":
+        ruc = request.POST.get("ruc")
+        name = request.POST.get("name")
+        province_id = request.POST.get("province")
+        errors = {}
+
+        if not ruc:
+            errors["ruc"] = ["Este campo es obligatorio."]
+        if not name:
+            errors["name"] = ["Este campo es obligatorio."]
+        if not province_id:
+            errors["province"] = ["Este campo es obligatorio."]
+        else:
+            try:
+                province = Province.objects.get(id=province_id)
+            except Province.DoesNotExist:
+                errors["province"] = ["Provincia no válida."]
+
+        if errors:
+            return JsonResponse({"errors": errors}, status=400)
+
+        company = Company.objects.create(ruc=ruc, name=name, province=province)
+
+        return JsonResponse({
+            "id": company.id,
+            "ruc": company.ruc,
+            "name": company.name,
+            "province": company.province.name
+        })
+
+    return JsonResponse({"error": "Método no permitido"}, status=405)
+
+
+@login_required
+def update_company(request, company_id):
+    data = json.loads(request.body)
+    try:
+        company = Company.objects.get(id=company_id)
+        company.ruc = data["ruc"]
+        company.name = data["name"]
+        company.save()
+        return JsonResponse({"success": True})
+    except Exception as e:
+        return JsonResponse({"success": False, "error": str(e)}, status=400)
+
+@login_required
+def delete_company(request, company_id):
+    Company.objects.filter(id=company_id).delete()
+    return HttpResponse(status=204)
+
+
+@csrf_exempt
+def edit_company(request, id):
+    company = Company.objects.get(id=id)
+    if request.method == "POST":
+        form = CompanyForm(request.POST, instance=company)
+        if form.is_valid():
+            company = form.save()
+            return JsonResponse(
+                {"id": company.id, "ruc": company.ruc, "name": company.name}
+            )
+        else:
+            return JsonResponse({"errors": form.errors}, status=400)
+    return JsonResponse({"error": "Método no permitido"}, status=405)
+
+
+#* ---------------------------------------- CRUD REPORT  ----------------------------------------
+
+def see_report_json(request, report_id):
+    report = Report.objects.get(id=report_id)
+    data = {
+        "id": report.id,
+        "name": report.name,
+        "year": report.year,
+        "company": {
+            "id": report.company.id,
+            "name": report.company.name,
+        },
+        "upload_date": report.upload_date.strftime("%Y-%m-%d"),
+    }
+    return JsonResponse(data)
+
+
+def delete_report(request, report_id):
+    Report.objects.filter(id=report_id).delete()
+    return HttpResponse(status=204)
+
+
+def update_report(request, report_id):
+    data = json.loads(request.body)
+    try:
+        report = Report.objects.get(id=report_id)
+        report.name = data["name"]
+        report.year = data["year"]
+        report.company = Company.objects.get(id=data["company"])
+        report.save()
+        return JsonResponse({"success": True})
+    except Exception as e:
+        return JsonResponse({"success": False, "error": str(e)}, status=400)
