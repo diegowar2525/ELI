@@ -39,7 +39,7 @@ class TotalCount(models.Model):
     quantity = models.PositiveIntegerField()
 
     def __str__(self):
-        return f"{self.word} - {self.quantity}"
+        return f"{self.word} - {self.quantity} - {self.year}"
 
 
 class TotalCountReport(models.Model):

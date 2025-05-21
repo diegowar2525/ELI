@@ -50,6 +50,13 @@ def reports_view(request):
     )
 
 
+def report_count_view(request):
+    
+    return render(
+        request,
+        "totalcountreport.html"
+    )
+
 @login_required
 def upload_view(request):
     individual_form = IndividualReportUploadForm()
@@ -100,7 +107,8 @@ def totalcount_view(request):
 @login_required
 def see_company_json(request, company_id):
     company = Company.objects.get(id=company_id)
-    data = {"ruc": company.ruc, "name": company.name}
+    province = Province.objects.get(id=company.province.id)
+    data = {"ruc": company.ruc, "name": company.name, "province": company.province.name}
     return JsonResponse(data)
 
 
@@ -205,3 +213,4 @@ def update_report(request, report_id):
         return JsonResponse({"success": True})
     except Exception as e:
         return JsonResponse({"success": False, "error": str(e)}, status=400)
+

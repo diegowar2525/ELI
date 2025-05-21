@@ -4,10 +4,16 @@
 
 {% block content %}
 <div class="container mx-auto px-4">
-    <!-- !Botón para volver al panel -->
-    <div class="mb-4">
-        <a href="{% url 'panel' %}" class="inline-block bg-blue-200 hover:bg-gray-300 text-gray-800 font-semibold py-2 px-4 rounded shadow">
-            Volver al panel de administración
+    <!-- !Panel de administración -->
+    <div class="mb-6">
+        <a href="{% url 'panel' %}"
+        class="inline-flex items-center gap-2 bg-gradient-to-r from-blue-400 to-blue-600 hover:from-blue-500 hover:to-blue-700 text-white font-medium py-2.5 px-6 rounded-xl shadow-md hover:shadow-lg transition-all duration-300 ease-in-out">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
+                stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M3 10h18M3 6h18M3 14h18M3 18h18"/>
+            </svg>
+            Panel de administración
         </a>
     </div>
 
@@ -121,16 +127,29 @@
                     <td class="px-4 py-2">{{ company.province.name }}</td>
                     <td class="px-4 py-2 space-x-2">
                         <button onclick="showDetails({{ company.id }})"
-                            class="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-1 px-3 rounded">
-                            Detalles
+                                class="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-1 px-3 rounded inline-flex items-center">
+                                <!-- Icono: Eye -->
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0zm-6.928 4.485A9.969 9.969 0 0112 4.5c2.485 0 4.735.909 6.485 2.485M12 4.5C9.515 4.5 7.265 5.409 5.515 6.985M12 19.5c-2.485 0-4.735-.909-6.485-2.485M12 19.5c2.485 0 4.735-.909 6.485-2.485" />
+                                </svg>
+                                Detalles
                         </button>
                         <button onclick="openEditModal({{ company.id }})"
-                                class="bg-yellow-500 hover:bg-yellow-600 text-white font-semibold py-1 px-3 rounded">
-                            Editar
+                                class="bg-yellow-500 hover:bg-yellow-600 text-white font-semibold py-1 px-3 rounded inline-flex items-center">
+                                <!-- Icono: Pencil -->
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536M9 13l6-6 3.536 3.536-6 6H9v-3.536z" />
+                                </svg>
+                                Editar
                         </button>
                         <button onclick="openDeleteModal({{ company.id }})"
-                                class="bg-red-500 hover:bg-red-600 text-white font-semibold py-1 px-3 rounded">
-                            Borrar
+                                class="bg-red-500 hover:bg-red-600 text-white font-semibold py-1 px-3 rounded inline-flex items-center">
+                                <!-- Icono: Trash -->
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                                </svg>
+                                Borrar
+                            </button>
                         </button>
                     </td>
                 </tr>

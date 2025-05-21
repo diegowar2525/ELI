@@ -1,4 +1,4 @@
-// -------------------- UTILIDADES --------------------
+// ---------------------------------------- UTILIDADES ----------------------------------------
 // Obtiene el valor de una cookie por nombre (para CSRF)
 function getCookie(name) {
     let cookieValue = null;
@@ -24,7 +24,7 @@ function clearErrors() {
     });
 }
 
-// -------------------- DETALLES --------------------
+// ---------------------------------------- DETALLES ----------------------------------------
 // Muestra el modal de detalles de una empresa
 function showDetails(id) {
     fetch(`/reports/${id}/json/`)
@@ -43,7 +43,7 @@ function closeDetailsModal() {
     document.getElementById('detailsModal').classList.add('hidden');
 }
 
-// -------------------- ELIMINACIÓN --------------------
+// ---------------------------------------- ELIMINACIÓN ----------------------------------------
 let reportToDelete = null;
 
 // Abre el modal de confirmación de borrado
@@ -75,7 +75,7 @@ function deleteReport() {
     });
 }
 
-// -------------------- EDICIÓN --------------------
+// ---------------------------------------- EDICIÓN ----------------------------------------
 // Abre el modal de edición y llena los campos con los datos actuales
 function openEditModal(id) {
     fetch(`/reports/${id}/json/`)
