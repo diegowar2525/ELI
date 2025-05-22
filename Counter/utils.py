@@ -1,33 +1,67 @@
+import fitz  # PyMuPDF
+from pdf2image import convert_from_path
+import pytesseract
+import unicodedata
 import pandas as pd
-from .models import Company, Province
+from .models import Province, Company
+
+
+def extraer_texto_pdf(path: str) -> str:
+    """Extrae texto de un PDF digital."""
+    texto = ""
+    with fitz.open(path) as doc:
+        for page in doc:
+            texto += page.get_text()
+    return texto
+
+
+def extraer_texto_ocr_pdf(path: str) -> str:
+    """Extrae texto de un PDF escaneado (OCR)."""
+    texto = ""
+    paginas = convert_from_path(path)
+    for img in paginas:
+        texto += pytesseract.image_to_string(img, lang="spa")
+    return texto
+
+
+def extraer_texto_pdf_inteligente(path: str) -> str:
+    """Detecta si el PDF es digital o escaneado y extrae el texto apropiadamente."""
+    texto = extraer_texto_pdf(path)
+    if not texto.strip():  # Si el texto está vacío, probablemente es un PDF escaneado
+        texto = extraer_texto_ocr_pdf(path)
+    return texto
+
+
+def quitar_tildes(palabra: str) -> str:
+    """Quita tildes y diacríticos de una palabra."""
+    return "".join(
+        c
+        for c in unicodedata.normalize("NFD", palabra)
+        if unicodedata.category(c) != "Mn"
+    )
 
 
 def insertar_empresas(archivo_excel):
-    # Leer el archivo Excel
+    """Carga empresas desde un archivo Excel."""
     df = pd.read_excel(archivo_excel)
 
     for _, row in df.iterrows():
-        nombre_empresa = row['NOMBRE DE LA ENTIDAD']
-        ruc_empresa = row['IDENTIFICACIÓN']
-        nombre_provincia = row['provincia']
+        nombre_empresa = row["NOMBRE DE LA ENTIDAD"]
+        ruc_empresa = row["IDENTIFICACIÓN"]
+        nombre_provincia = row["provincia"]
 
-        # Obtener o crear la provincia
         provincia, _ = Province.objects.get_or_create(name=nombre_provincia)
 
-        # Verificar si la empresa ya existe por nombre o por ruc
-        if not Company.objects.filter(name=nombre_empresa).exists() and not Company.objects.filter(ruc=ruc_empresa).exists():
+        if (
+            not Company.objects.filter(name=nombre_empresa).exists()
+            and not Company.objects.filter(ruc=ruc_empresa).exists()
+        ):
             Company.objects.create(
-                name=nombre_empresa,
-                ruc=ruc_empresa,
-                province=provincia
+                name=nombre_empresa, ruc=ruc_empresa, province=provincia
             )
         else:
-            print(f"Empresa '{nombre_empresa}' con RUC '{ruc_empresa}' ya existe. No se insertó.")
+            print(
+                f"Empresa '{nombre_empresa}' con RUC '{ruc_empresa}' ya existe. No se insertó."
+            )
 
     print("Empresas importadas correctamente.")
-
-
-
-from Counter.utils import insertar_empresas
-
-insertar_empresas(r'C:\Users\Usuario\Downloads\Prácticas\Empresas.xlsx')

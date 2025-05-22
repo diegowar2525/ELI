@@ -97,7 +97,8 @@
                     <td class="px-4 py-2">
                         {% if report %}
                             <button class="bg-purple-500 hover:bg-blue-600 text-white font-semibold py-1 px-3 rounded inline-flex items-center">
-                                <a href="{% url 'report_count' %}" class="flex items-center">
+                                <a href="{% url 'report_count' report.id %}" class="flex items-center">
+
                                     <!-- Icono: Chart Bar -->
                                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3v18h18M9 17V9m4 8V5m4 12v-6" />

@@ -29,6 +29,7 @@ class Report(models.Model):
     file = models.FileField(upload_to="reportes/")
     upload_date = models.DateTimeField(auto_now_add=True)
 
+
     def __str__(self):
         return f"Reporte {self.year} - {self.name}"
 
