@@ -25,6 +25,7 @@ STOPWORDS_ES = {
     "aun",
     "aunque",
     "bajo",
+    "son",
     "bastante",
     "bien",
     "cada",

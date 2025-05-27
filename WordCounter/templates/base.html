@@ -5,11 +5,12 @@
     <meta charset="UTF-8">
     <title>{% block title %}Enterprise Lex Index{% endblock %}</title>
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    {% block custom_css %} {% endblock %}
 </head>
 
 <body class="bg-gray-100 text-gray-900 flex flex-col min-h-screen">
 
-    <!-- Navegación -->
+    <!-- !Navegación -->
     <nav class="bg-white shadow-md">
         <div class="container mx-auto px-4 py-4 flex justify-between items-center">
             <a href="{% url 'index' %}" class="text-3xl font-bold text-blue-600">ELI</a>
@@ -41,12 +42,12 @@
         </div>
     </nav>
 
-    <!-- Contenido principal -->
+    <!-- !Contenido principal -->
     <main class="container mx-auto py-8 flex-grow">
         {% block content %}{% endblock %}
     </main>
 
-    <!-- Footer fijo abajo -->
+    <!-- !Footer -->
     <footer class="bg-gray-200 text-center py-4">
         © 2025 WordCounter. Todos los derechos reservados.
     </footer>

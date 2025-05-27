@@ -57,6 +57,7 @@ def totalcountreport_view(request, report_id):
         TotalCountReport.objects.filter(report__id=report_id).order_by("-quantity")
     )
     report = Report.objects.get(id=report_id)
+    conteos = TotalCountReport.objects.filter(report=report).order_by('-quantity')[:10]
 
     mid = len(results) // 2
     left = results[:mid]
@@ -75,6 +76,7 @@ def totalcountreport_view(request, report_id):
         {
             "paired_results": paired_results,
             "report": report,
+            "top10_words": conteos,
         },
     )
 
@@ -90,7 +92,7 @@ def upload_view(request):
             individual_form = IndividualReportUploadForm(request.POST, request.FILES)
             if individual_form.is_valid():
                 reporte = individual_form.save()
-
+                
                 # Función para procesar el reporte individual
                 process_report(reporte.file.path, reporte)
 
@@ -101,6 +103,7 @@ def upload_view(request):
             zip_form = ZipUploadForm(request.POST, request.FILES)
             if zip_form.is_valid():
                 zip_file = zip_form.cleaned_data["zip_file"]
+                company = zip_form.cleaned_data["company"]
                 zip_path = os.path.join(
                     settings.MEDIA_ROOT, "zip_uploads", zip_file.name
                 )
@@ -111,7 +114,7 @@ def upload_view(request):
                         destination.write(chunk)
 
                 # Procesa el archivo ZIP que acabas de guardar
-                process_zip(zip_path)
+                process_zip(zip_path, company)
 
                 messages.success(
                     request, f"Archivo ZIP subido y procesado correctamente."

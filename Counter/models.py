@@ -23,9 +23,9 @@ class Company(models.Model):
 
 
 class Report(models.Model):
-    company = models.ForeignKey(Company, on_delete=models.CASCADE)
-    name = models.CharField(max_length=255)
-    year = models.PositiveIntegerField()
+    company = models.ForeignKey(Company, on_delete=models.CASCADE, null=True, blank=True)
+    name = models.CharField(max_length=255, null=True, blank=True)
+    year = models.PositiveIntegerField(null=True, blank=True)
     file = models.FileField(upload_to="reportes/")
     upload_date = models.DateTimeField(auto_now_add=True)
 
