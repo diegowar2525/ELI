@@ -1,15 +1,18 @@
 from django.shortcuts import render, redirect
 from django.http import HttpResponse
 from django.contrib.auth.decorators import login_required
-from .models import Report, Company, Province, TotalCountReport, TotalCount
+from .models import Report, Company, Province, TotalCountReport, TotalCount, ExpertWord
 from .forms import IndividualReportUploadForm, ZipUploadForm, CompanyForm
 from django.contrib import messages
+from django.db.models import Sum
 from .main import process_report, process_zip
 from django.http import JsonResponse
 from django.conf import settings
 from django.views.decorators.csrf import csrf_exempt
 import json
 import os
+import openpyxl
+from openpyxl.utils import get_column_letter
 
 
 # * ---------------------------------------- VISTAS GENERALES ----------------------------------------
@@ -134,7 +137,94 @@ def upload_view(request):
 
 @login_required
 def totalcount_view(request):
-    return render(request, "totalcount.html")
+    total_counts = TotalCount.objects.all().order_by("-year", "-quantity")
+    
+    year = request.GET.get("year")
+    company_id = request.GET.get("company")
+    solo_claves = request.GET.get("expert_words")
+
+    if year:
+        total_counts = total_counts.filter(year=year)
+    if company_id:
+        total_counts = total_counts.filter(company__id=company_id)
+    if solo_claves is not None:
+        expert_words = ExpertWord.objects.values_list("word", flat=True)
+        total_counts = total_counts.filter(word__in=expert_words)
+    
+    total_quantity = total_counts.aggregate(suma=Sum("quantity"))["suma"] or 0
+    count = total_counts.count()
+    average = round(total_quantity / count, 2) if count > 0 else 0
+
+    # Diccionario con pesos por ID
+    word_average = {
+        item.id: round(item.quantity/average, 2) if item.quantity > 0 else 0
+        for item in total_counts
+    }
+
+    companies = Company.objects.all().order_by("name")
+
+    return render(request, "totalcount.html", {
+        "total_counts": total_counts,
+        "companies": companies,
+        "average": average,
+        "word_average": word_average,
+    })
+
+
+@login_required
+def export_totalcount_excel(request):
+    total_counts = TotalCount.objects.all().order_by("-year", "-quantity")
+
+    year = request.GET.get("year")
+    company_id = request.GET.get("company")
+    solo_claves = request.GET.get("expert_words")
+
+    if year:
+        total_counts = total_counts.filter(year=year)
+    if company_id:
+        total_counts = total_counts.filter(company__id=company_id)
+    if solo_claves is not None:
+        expert_words = ExpertWord.objects.values_list("word", flat=True)
+        total_counts = total_counts.filter(word__in=expert_words)
+
+    total_quantity = total_counts.aggregate(suma=Sum("quantity"))["suma"] or 0
+    count = total_counts.count()
+    average = round(total_quantity / count, 2) if count > 0 else 0
+
+    word_average = {
+        item.id: round(item.quantity / average, 2) if item.quantity > 0 else 0
+        for item in total_counts
+    }
+
+    # Crear libro Excel
+    wb = openpyxl.Workbook()
+    ws = wb.active
+    ws.title = "Conteo Total"
+
+    # Escribir encabezados
+    ws.append(["Palabra", "Cantidad", "Peso", "Empresa", "Año"])
+
+    # Escribir datos
+    for item in total_counts:
+        ws.append([
+            item.word,
+            item.quantity,
+            word_average.get(item.id, 0),
+            item.company.name,
+            item.year,
+        ])
+
+    # Fila vacía como separador
+    ws.append([])
+
+    # Fila de promedio total
+    ws.append(["", "", "Promedio total:", average])
+
+    # Preparar respuesta HTTP
+    response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+    response['Content-Disposition'] = 'attachment; filename=conteo_total.xlsx'
+    wb.save(response)
+    return response
 
 
 # * ---------------------------------------- CRUD COMPANIES  ----------------------------------------

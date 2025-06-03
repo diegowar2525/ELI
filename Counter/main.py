@@ -1,9 +1,9 @@
 import re
 from collections import Counter
-from .models import TotalCountReport, Report
+from .models import TotalCountReport, Report, TotalCount
+from django.db.models import F
 from .stopwords import STOPWORDS_ES
 from .utils import quitar_tildes, extraer_texto_pdf_inteligente, encontrar_compañia_año
-
 import zipfile
 import os
 from tempfile import TemporaryDirectory
@@ -36,14 +36,27 @@ def process_report(report_path: str, report_instance: Report):
     if not getattr(report_instance, 'year', None):
         report_instance.year = year
     report_instance.save()
-
     conteo = contar_palabras(texto)
+
+    company = report_instance.company
+    year = report_instance.year
+
     for palabra, cantidad in conteo.items():
         TotalCountReport.objects.update_or_create(
-            report=report_instance, word=palabra, defaults={"quantity": cantidad}
+            report=report_instance,
+            word=palabra,
+            defaults={"quantity": cantidad}
         )
 
-
+        if year and company:
+            obj, creado = TotalCount.objects.get_or_create(
+                year=year,
+                word=palabra,
+                company=company,
+                defaults={"quantity": cantidad}
+            )
+            if not creado:
+                TotalCount.objects.filter(pk=obj.pk).update(quantity=F('quantity') + cantidad)
 
 def process_zip(zip_path: str, company=None):
     """Procesa un archivo ZIP que contiene múltiples reportes PDF, incluyendo subcarpetas."""

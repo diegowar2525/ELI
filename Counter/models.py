@@ -38,9 +38,13 @@ class TotalCount(models.Model):
     year = models.PositiveIntegerField()
     word = models.CharField(max_length=100)
     quantity = models.PositiveIntegerField()
+    company = models.ForeignKey(Company, on_delete=models.CASCADE, null=True, blank=True)
+
+    class Meta:
+        unique_together = ('year', 'word', 'company')
 
     def __str__(self):
-        return f"{self.word} - {self.quantity} - {self.year}"
+        return f"{self.word} ({self.company}) - {self.quantity} - {self.year}"
 
 
 class TotalCountReport(models.Model):
@@ -53,3 +57,10 @@ class TotalCountReport(models.Model):
     
     def __str__(self):
         return f"{self.word} - {self.quantity}"
+    
+
+class ExpertWord(models.Model):
+    word = models.CharField(max_length=100, unique=True)
+
+    def __str__(self):
+        return self.word
