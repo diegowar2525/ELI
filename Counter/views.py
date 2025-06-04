@@ -2,7 +2,7 @@ from django.shortcuts import render, redirect
 from django.http import HttpResponse
 from django.contrib.auth.decorators import login_required
 from .models import Report, Company, Province, TotalCountReport, TotalCount, ExpertWord
-from .forms import IndividualReportUploadForm, ZipUploadForm, CompanyForm
+from .forms import IndividualReportUploadForm, ZipUploadForm
 from django.contrib import messages
 from django.db.models import Sum
 from .main import process_report, process_zip
@@ -16,8 +16,6 @@ from openpyxl.utils import get_column_letter
 
 
 # * ---------------------------------------- VISTAS GENERALES ----------------------------------------
-
-
 def index_view(request):
     return render(request, "index.html")
 
@@ -227,6 +225,21 @@ def export_totalcount_excel(request):
     return response
 
 
+def expert_lists_view(request):
+    return render(request, "expert_lists.html")
+
+
+def concealment_detection_view(request):
+    return render(request, "concealment_detection.html")
+
+
+def comparative_analysis_view(request):
+    return render(request, "comparative_analysis.html")
+
+
+def users_view(request):
+    return render(request, "users.html")
+
 # * ---------------------------------------- CRUD COMPANIES  ----------------------------------------
 @login_required
 def see_company_json(request, company_id):
@@ -304,8 +317,6 @@ def update_company(request, company_id):
 
 
 # * ---------------------------------------- CRUD REPORT  ----------------------------------------
-
-
 def see_report_json(request, report_id):
     report = Report.objects.get(id=report_id)
     data = {
