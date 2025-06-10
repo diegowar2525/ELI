@@ -1,5 +1,6 @@
 from django.db import models
 from django.db.models import JSONField
+from User.models import Expert
 
 # Create your models here.
 
@@ -58,9 +59,11 @@ class TotalCountReport(models.Model):
     def __str__(self):
         return f"{self.word} - {self.quantity}"
     
-
+    
 class ExpertWord(models.Model):
-    word = models.CharField(max_length=100, unique=True)
+    expert = models.ForeignKey(Expert, on_delete=models.CASCADE, related_name='word_lists')
+    name = models.CharField(max_length=100, null=True, blank=True)
+    words = JSONField(default=list, blank=True, null=True)
 
     def __str__(self):
-        return self.word
+        return f"{self.name} ({self.expert.user.username})"

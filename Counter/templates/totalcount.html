@@ -20,21 +20,21 @@
     <h1 class="text-3xl font-bold mb-4">Conteo total</h1>
     <h2 class="text-2xl font-semibold mb-4">Filtros</h2>
     
-    <!-- !Filtros -->
-    <div class="bg-white shadow rounded-2xl p-6 mb-8">
+    <!-- !Filtros Mejorados -->
+    <div class="bg-white shadow rounded-2xl p-8 mb-10">
         <form method="get" class="flex flex-wrap gap-6 items-end">
             <!-- !Año -->
-            <div class="w-40">
-                <label for="year" class="block text-sm font-medium text-gray-700">Año:</label>
+            <div class="flex flex-col w-44">
+                <label for="year" class="mb-1 text-sm font-medium text-gray-700">Año:</label>
                 <input type="number" name="year" id="year" value="{{ request.GET.year }}"
-                       class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                       class="border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition w-full text-gray-800 shadow-sm">
             </div>
 
             <!-- !Empresa -->
-            <div class="w-48">
-                <label for="company" class="block text-sm font-medium text-gray-700">Empresa:</label>
+            <div class="flex flex-col w-56">
+                <label for="company" class="mb-1 text-sm font-medium text-gray-700">Empresa:</label>
                 <select name="company" id="company"
-                        class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                        class="border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition w-full text-gray-800 shadow-sm">
                     <option value="">-- Todas --</option>
                     {% for company in companies %}
                         <option value="{{ company.id }}" {% if request.GET.company == company.id|stringformat:"s" %}selected{% endif %}>
@@ -45,17 +45,19 @@
             </div>
 
             <!-- !Palabras clave -->
-            <div class="flex items-center gap-2 mt-6">
-                <input type="checkbox" name="expert_words" id="expert_words"
-                       class="h-4 w-4 text-blue-600 border-gray-300 rounded"
-                       {% if request.GET.expert_words %}checked{% endif %}>
-                <label for="expert_words" class="text-sm text-gray-700">Palabras de experto</label>
+            <div class="flex flex-col w-56">
+                <div class="flex items-center gap-2 my-2">
+                    <input type="checkbox" name="expert_words" id="expert_words"
+                           class="h-5 w-5 text-blue-600 border-gray-300 rounded focus:ring-blue-400"
+                           {% if request.GET.expert_words %}checked{% endif %}>
+                    <label for="expert_words" class="text-sm text-gray-700 select-none">Solo palabras de experto</label>
+                </div>
             </div>
 
             <!-- !Botones -->
-            <div class="flex gap-2 mt-6">
+            <div class="flex gap-3 mt-6 min-w-max">
                 <button type="submit"
-                        class="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md shadow">
+                        class="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-lg shadow transition font-medium">
                     <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                               d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2H3V4zm0 4h18v2H3V8zm0 4h18v2H3v-2zm0 4h18v2H3v-2z"/>
@@ -64,7 +66,7 @@
                 </button>
 
                 <a href="{% url 'export_excel' %}?year={{ request.GET.year }}&company={{ request.GET.company }}{% if request.GET.expert_words %}&expert_words=on{% endif %}"
-                   class="inline-flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md shadow">
+                   class="inline-flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white px-5 py-2.5 rounded-lg shadow transition font-medium">
                     <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                               d="M12 4v16m8-8H4"/>

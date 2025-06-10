@@ -1,14 +1,17 @@
-import re
-from collections import Counter
-from .models import TotalCountReport, Report, TotalCount
-from django.db.models import F
-from .stopwords import STOPWORDS_ES
-from .utils import quitar_tildes, extraer_texto_pdf_inteligente, encontrar_compañia_año
-import zipfile
 import os
+import re
+import zipfile
+from collections import Counter
 from tempfile import TemporaryDirectory
 
+from django.db.models import F
+
+from .models import TotalCountReport, Report, TotalCount
+from .stopwords import STOPWORDS_ES
+from .utils import quitar_tildes, extraer_texto_pdf_inteligente, encontrar_compañia_año
+
 STOPWORDS_ES_NORMALIZADAS = set(quitar_tildes(p) for p in STOPWORDS_ES)
+
 
 def contar_palabras(texto: str) -> Counter:
     """Cuenta las palabras en un texto, normalizando y eliminando stopwords."""
@@ -29,11 +32,11 @@ def process_report(report_path: str, report_instance: Report):
 
     # Actualiza los campos del reporte solo si no se han proporcionado
 
-    if not getattr(report_instance, 'name', None):
+    if not getattr(report_instance, "name", None):
         report_instance.name = os.path.basename(report_path)
-    if not getattr(report_instance, 'company', None):
+    if not getattr(report_instance, "company", None):
         report_instance.company = company
-    if not getattr(report_instance, 'year', None):
+    if not getattr(report_instance, "year", None):
         report_instance.year = year
     report_instance.save()
     conteo = contar_palabras(texto)
@@ -43,9 +46,7 @@ def process_report(report_path: str, report_instance: Report):
 
     for palabra, cantidad in conteo.items():
         TotalCountReport.objects.update_or_create(
-            report=report_instance,
-            word=palabra,
-            defaults={"quantity": cantidad}
+            report=report_instance, word=palabra, defaults={"quantity": cantidad}
         )
 
         if year and company:
@@ -53,20 +54,23 @@ def process_report(report_path: str, report_instance: Report):
                 year=year,
                 word=palabra,
                 company=company,
-                defaults={"quantity": cantidad}
+                defaults={"quantity": cantidad},
             )
             if not creado:
-                TotalCount.objects.filter(pk=obj.pk).update(quantity=F('quantity') + cantidad)
+                TotalCount.objects.filter(pk=obj.pk).update(
+                    quantity=F("quantity") + cantidad
+                )
+
 
 def process_zip(zip_path: str, company=None):
     """Procesa un archivo ZIP que contiene múltiples reportes PDF, incluyendo subcarpetas."""
 
-    with zipfile.ZipFile(zip_path, 'r') as zip_ref, TemporaryDirectory() as temp_dir:
+    with zipfile.ZipFile(zip_path, "r") as zip_ref, TemporaryDirectory() as temp_dir:
         zip_ref.extractall(temp_dir)
 
         for root, dirs, files in os.walk(temp_dir):
             for filename in files:
-                if not filename.lower().endswith('.pdf'):
+                if not filename.lower().endswith(".pdf"):
                     continue  # Ignora archivos que no son PDF
 
                 file_path = os.path.join(root, filename)
@@ -80,5 +84,3 @@ def process_zip(zip_path: str, company=None):
 
                 except Exception as e:
                     print(f"Error procesando {file_path}: {e}")
-
-

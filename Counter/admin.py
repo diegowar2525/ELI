@@ -9,3 +9,4 @@ admin.site.register(TotalCount)
 admin.site.register(Province)
 admin.site.register(TotalCountReport)
 admin.site.register(ExpertWord)
+

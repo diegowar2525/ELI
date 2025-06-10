@@ -25,16 +25,15 @@ class IndividualReportUploadForm(forms.ModelForm):
         self.fields["file"].required = True
 
 
-
 class ZipUploadForm(forms.Form):
     zip_file = forms.FileField(
         label="Archivo ZIP",
-        widget=forms.ClearableFileInput(attrs={"class": "border rounded px-2 py-1"})
+        widget=forms.ClearableFileInput(attrs={"class": "border rounded px-2 py-1"}),
     )
     company = forms.ModelChoiceField(
         queryset=Company.objects.all(),
         required=False,
-        widget=forms.Select(attrs={"class": "border rounded px-2 py-1"})
+        widget=forms.Select(attrs={"class": "border rounded px-2 py-1"}),
     )
 
 

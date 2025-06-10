@@ -1,12 +1,14 @@
-import fitz  # PyMuPDF
-from pdf2image import convert_from_path
-import pytesseract
-import unicodedata
-import pandas as pd
 import re
+import unicodedata
+
+import fitz  # PyMuPDF
+import pandas as pd
+import pytesseract
 from fuzzywuzzy import fuzz
+from pdf2image import convert_from_path
+
 from .models import Province, Company
-from django.utils.text import slugify
+
 
 def extraer_texto_pdf(path: str) -> str:
     """Extrae texto de un PDF digital."""
@@ -45,7 +47,7 @@ def quitar_tildes(palabra: str) -> str:
 
 def encontrar_compañia_año(text: str):
     """Busca el nombre de la empresa y un año en el texto. Devuelve valores por defecto si no encuentra coincidencias."""
-    year_match = re.search(r'\b(19|20)\d{2}\b', text)
+    year_match = re.search(r"\b(19|20)\d{2}\b", text)
     year = int(year_match.group()) if year_match else 2023
 
     best_score = 0
@@ -94,6 +96,6 @@ def insertar_empresas(archivo_excel):
 
 
 # from Counter.models import Province, Company
-# from utils import insertar_empresas
+# from Counter.utils import insertar_empresas
 
-# insertar_empresas(r"path/to/your/excel/file.xlsx")
+# insertar_empresas(r"C:\Users\Usuario\Downloads\Prácticas\Empresas.xlsx")

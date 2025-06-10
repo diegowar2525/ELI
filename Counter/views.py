@@ -1,18 +1,20 @@
-from django.shortcuts import render, redirect
-from django.http import HttpResponse
+import os
+import json
+import openpyxl
+from itertools import chain
+
+from django.shortcuts import render, redirect, get_object_or_404
+from django.http import HttpResponse, JsonResponse, HttpResponseNotAllowed
 from django.contrib.auth.decorators import login_required
-from .models import Report, Company, Province, TotalCountReport, TotalCount, ExpertWord
-from .forms import IndividualReportUploadForm, ZipUploadForm
 from django.contrib import messages
-from django.db.models import Sum
-from .main import process_report, process_zip
-from django.http import JsonResponse
+from django.db.models import Sum, Prefetch
 from django.conf import settings
 from django.views.decorators.csrf import csrf_exempt
-import json
-import os
-import openpyxl
-from openpyxl.utils import get_column_letter
+
+from .models import Report, Company, Province, TotalCountReport, TotalCount, ExpertWord
+from User.models import Expert
+from .forms import IndividualReportUploadForm, ZipUploadForm
+from .main import process_report, process_zip
 
 
 # * ---------------------------------------- VISTAS GENERALES ----------------------------------------
@@ -53,6 +55,7 @@ def reports_view(request):
     )
 
 
+@login_required
 def totalcountreport_view(request, report_id):
     results = list(
         TotalCountReport.objects.filter(report__id=report_id).order_by("-quantity")
@@ -136,7 +139,8 @@ def upload_view(request):
 @login_required
 def totalcount_view(request):
     total_counts = TotalCount.objects.all().order_by("-year", "-quantity")
-    
+
+    # Filtrar por año, empresa y palabras clave
     year = request.GET.get("year")
     company_id = request.GET.get("company")
     solo_claves = request.GET.get("expert_words")
@@ -145,17 +149,26 @@ def totalcount_view(request):
         total_counts = total_counts.filter(year=year)
     if company_id:
         total_counts = total_counts.filter(company__id=company_id)
-    if solo_claves is not None:
-        expert_words = ExpertWord.objects.values_list("word", flat=True)
-        total_counts = total_counts.filter(word__in=expert_words)
     
+    if solo_claves is not None:
+        try:
+            expert = request.user.expert_profile  # gracias al related_name='expert_profile'
+            expert_word_objs = ExpertWord.objects.filter(expert=expert)
+            # Obtener palabras asociadas al experto
+            expert_words = list(chain.from_iterable(word_obj.words for word_obj in expert_word_objs if word_obj.words))
+            # Filtrar los conteos solo por palabras clave del experto
+            total_counts = total_counts.filter(word__in=expert_words)
+        except Expert.DoesNotExist:
+            total_counts = total_counts.none()  # Usuario no tiene perfil de experto
+
+    # Cálculos estadísticos
     total_quantity = total_counts.aggregate(suma=Sum("quantity"))["suma"] or 0
     count = total_counts.count()
     average = round(total_quantity / count, 2) if count > 0 else 0
 
     # Diccionario con pesos por ID
     word_average = {
-        item.id: round(item.quantity/average, 2) if item.quantity > 0 else 0
+        item.id: round(item.quantity / average, 2) if item.quantity > 0 else 0
         for item in total_counts
     }
 
@@ -176,6 +189,7 @@ def export_totalcount_excel(request):
     year = request.GET.get("year")
     company_id = request.GET.get("company")
     solo_claves = request.GET.get("expert_words")
+    palabras_expert = list(chain.from_iterable(e.words for e in expert_words if e.words))
 
     if year:
         total_counts = total_counts.filter(year=year)
@@ -183,7 +197,7 @@ def export_totalcount_excel(request):
         total_counts = total_counts.filter(company__id=company_id)
     if solo_claves is not None:
         expert_words = ExpertWord.objects.values_list("word", flat=True)
-        total_counts = total_counts.filter(word__in=expert_words)
+        total_counts = total_counts.filter(word__in=palabras_expert)
 
     total_quantity = total_counts.aggregate(suma=Sum("quantity"))["suma"] or 0
     count = total_counts.count()
@@ -225,20 +239,79 @@ def export_totalcount_excel(request):
     return response
 
 
-def expert_lists_view(request):
-    return render(request, "expert_lists.html")
-
-
+@login_required
 def concealment_detection_view(request):
     return render(request, "concealment_detection.html")
 
 
+@login_required
 def comparative_analysis_view(request):
     return render(request, "comparative_analysis.html")
 
 
+@login_required
 def users_view(request):
     return render(request, "users.html")
+
+
+# * ---------------------------------------- CRUD EXPERT LISTS  ----------------------------------------
+
+def expert_lists_view(request):
+    """Muestra el template con todos los expertos y sus listas."""
+    experts = Expert.objects.prefetch_related("word_lists")
+    
+    return render(request, "expert_lists.html", {"experts": experts})
+
+
+@csrf_exempt
+def create_list(request):
+    if request.method != "POST":
+        return HttpResponseNotAllowed(["POST"])
+
+    data       = json.loads(request.body)
+    expert_id  = data.get("expert_id")
+    name       = data.get("name")
+
+    expert = get_object_or_404(Expert, id=expert_id)
+    lista  = ExpertWord.objects.create(expert=expert, name=name)
+
+    return JsonResponse({"success": True, "id": lista.id})
+
+
+def get_list_json(request, list_id):
+    lista = get_object_or_404(ExpertWord, id=list_id)
+    return JsonResponse({"id": lista.id, "name": lista.name})
+
+
+@csrf_exempt
+def update_list(request, list_id):
+    if request.method != "POST":
+        return HttpResponseNotAllowed(["POST"])
+
+    data = json.loads(request.body)
+    name = data.get("name")
+
+    try:
+        lista = ExpertWord.objects.get(id=list_id)
+    except ExpertWord.DoesNotExist:
+        return JsonResponse({"error": "not found"}, status=404)
+
+    lista.name = name
+    lista.save()
+    return JsonResponse({"success": True})
+
+
+@csrf_exempt
+def delete_list(request, list_id):
+    if request.method != "POST":
+        return HttpResponseNotAllowed(["POST"])
+
+    try:
+        lista = ExpertWord.objects.get(id=list_id)
+        lista.delete()
+        return JsonResponse({"success": True})
+    except ExpertWord.DoesNotExist:
+        return JsonResponse({"error": "not found"}, status=404)
 
 # * ---------------------------------------- CRUD COMPANIES  ----------------------------------------
 @login_required

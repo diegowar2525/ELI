@@ -12,30 +12,43 @@
 
     <!-- !Navegación -->
     <nav class="bg-white shadow-md">
-        <div class="container mx-auto px-4 py-4 flex justify-between items-center">
-            <a href="{% url 'index' %}" class="text-3xl font-bold text-blue-600">ELI</a>
-            <ul class="flex space-x-6">
+        <div class="container mx-auto px-4 py-4 flex items-center justify-between">
+            <a href="{% url 'index' %}" class="text-3xl font-bold text-blue-600 flex-shrink-0">ELI</a>
+            <ul class="flex items-center space-x-6 ml-auto">
                 {% if user.is_authenticated %}
                 <li>
-                    <div class="text-gray-700 mr-6 font-medium">
-                        ¡Bienvenido, <span class="font-bold text-blue-600">{{ user.username }}!</span>
+                    <div class="text-gray-700 font-medium flex items-center">
+                        ¡Bienvenido, <span class="font-bold text-blue-600 ml-1">{{ user.username }}!</span>
                     </div>
                 </li>
                 <li>
-                    <form action="{% url 'logout' %}" method="post">
+                    <form action="{% url 'logout' %}" method="post" class="flex items-center">
                         {% csrf_token %}
                         <button type="submit"
                             class="text-red-600 hover:underline bg-transparent border-none cursor-pointer">Cerrar
                             sesión</button>
                     </form>
                 </li>
-                <li><a href="{% url 'panel' %}" class="text-gray-700 hover:text-blue-600">Panel de administración</a></li>
-                {% else %}
                 <li>
-                    <a href="{% url 'login' %}" class="text-gray-700 hover:text-blue-600">Iniciar sesión</a>
+                    <a href="{% url 'panel' %}" class="text-gray-700 hover:text-blue-600 flex items-center">Panel de administración</a>
                 </li>
                 <li>
-                    <a href="{% url 'register' %}" class="text-gray-700 hover:text-blue-600">Registrarse</a>
+                    <a href="{% url 'profile' %}" class="flex items-center">
+                        {% if user.profile.picture %}
+                            <img src="{{ user.profile.picture.url }}" alt="Foto de perfil" class="w-16 h-16 rounded-full object-cover">
+                        {% else %}
+                        <div class="w-12 h-12 rounded-full bg-gray-300 flex items-center justify-center text-gray-600">
+                            <span class="text-sm">👤</span>
+                        </div>
+                        {% endif %}
+                    </a>
+                </li>
+                {% else %}
+                <li>
+                    <a href="{% url 'login' %}" class="text-gray-700 hover:text-blue-600 flex items-center">Iniciar sesión</a>
+                </li>
+                <li>
+                    <a href="{% url 'register' %}" class="text-gray-700 hover:text-blue-600 flex items-center">Registrarse</a>
                 </li>
                 {% endif %}
             </ul>
@@ -49,7 +62,7 @@
 
     <!-- !Footer -->
     <footer class="bg-gray-200 text-center py-4">
-        © 2025 WordCounter. Todos los derechos reservados.
+        © 2025 Enterprise Lex Index. Todos los derechos reservados.
     </footer>
 
     {% block scripts %}
