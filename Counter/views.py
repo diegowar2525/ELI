@@ -265,22 +265,25 @@ def expert_lists_view(request):
 
 @csrf_exempt
 def create_list(request):
-    if request.method != "POST":
-        return HttpResponseNotAllowed(["POST"])
-
-    data       = json.loads(request.body)
-    expert_id  = data.get("expert_id")
-    name       = data.get("name")
-
-    expert = get_object_or_404(Expert, id=expert_id)
-    lista  = ExpertWord.objects.create(expert=expert, name=name)
-
-    return JsonResponse({"success": True, "id": lista.id})
+    if request.method == 'POST':
+        data = json.loads(request.body)
+        print("DEBUG DATA:", data)
+        expert_id = data.get('expert_id')
+        name = data.get('name')
+        words = data.get('words', [])
+        expert = get_object_or_404(Expert, id=expert_id)
+        new_list = ExpertWord.objects.create(expert=expert, name=name, words=words)
+        return JsonResponse({'success': True, 'id': new_list.id})
+    return JsonResponse({'success': False}, status=400)
 
 
 def get_list_json(request, list_id):
     lista = get_object_or_404(ExpertWord, id=list_id)
-    return JsonResponse({"id": lista.id, "name": lista.name})
+    return JsonResponse({
+        "id": lista.id,
+        "name": lista.name,
+        "words": lista.words
+    })
 
 
 @csrf_exempt
@@ -288,15 +291,20 @@ def update_list(request, list_id):
     if request.method != "POST":
         return HttpResponseNotAllowed(["POST"])
 
-    data = json.loads(request.body)
-    name = data.get("name")
+    data  = json.loads(request.body)
 
     try:
         lista = ExpertWord.objects.get(id=list_id)
     except ExpertWord.DoesNotExist:
         return JsonResponse({"error": "not found"}, status=404)
 
-    lista.name = name
+    # Solo tocar los campos presentes en el JSON -------------------------
+    if "name" in data and data["name"] is not None:
+        lista.name = data["name"]
+
+    if "words" in data:                       # puede ser [] si el usuario las vacía a propósito
+        lista.words = data["words"]
+
     lista.save()
     return JsonResponse({"success": True})
 
