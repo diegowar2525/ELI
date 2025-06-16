@@ -73,7 +73,6 @@ document.addEventListener('DOMContentLoaded', () => {
   /* --- Envío del formulario -------------------------------------------- */
   listForm.addEventListener('submit', (e) => {
     e.preventDefault();
-    console.log("Se hizo submit al formulario");
 
     const listId   = listIdInput.value;
     const expertId = listForm.dataset.expertId;
@@ -87,8 +86,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (!listId) body.expert_id = expertId;
 
-    console.log("Payload enviado:", body);
-
     fetch(listId ? routes.update(listId) : routes.create, {
       method : 'POST',
       headers: {
@@ -98,7 +95,7 @@ document.addEventListener('DOMContentLoaded', () => {
       body: JSON.stringify(body)
     })
     .then(r => r.json())
-    // .then(data => { if (data.success) location.reload(); });
+    .then(data => { if (data.success) location.reload(); });
   });
 
 

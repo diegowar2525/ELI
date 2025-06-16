@@ -142,4 +142,4 @@ MEDIA_ROOT = BASE_DIR / 'media'
 
 MEDIA_URL = '/media/'
 
-DATA_UPLOAD_MAX_NUMBER_FIELDS = 10000  # o más si hace falta
+DATA_UPLOAD_MAX_NUMBER_FIELDS = 100000  # o más si hace falta
