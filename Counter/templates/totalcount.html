@@ -25,9 +25,16 @@
         <form method="get" class="flex flex-wrap gap-6 items-end">
             <!-- !Año -->
             <div class="flex flex-col w-44">
-                <label for="year" class="mb-1 text-sm font-medium text-gray-700">Año:</label>
-                <input type="number" name="year" id="year" value="{{ request.GET.year }}"
-                       class="border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition w-full text-gray-800 shadow-sm">
+                <label for="years" class="mb-1 text-sm font-medium text-gray-700">Año:</label>
+                <select name="selected_year" id="years"
+                        class="border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition w-full text-gray-800 shadow-sm">
+                    <option value="">-- Todos --</option>
+                    {% for year in years %}
+                        <option value="{{ year }}" {% if year|stringformat:"s" == selected_year %}selected{% endif %}>
+                            {{ year }}
+                        </option>
+                    {% endfor %}
+                </select>
             </div>
 
             <!-- !Empresa -->
@@ -44,14 +51,18 @@
                 </select>
             </div>
 
-            <!-- !Palabras clave -->
+            <!-- !Listas de experto -->
             <div class="flex flex-col w-56">
-                <div class="flex items-center gap-2 my-2">
-                    <input type="checkbox" name="expert_words" id="expert_words"
-                           class="h-5 w-5 text-blue-600 border-gray-300 rounded focus:ring-blue-400"
-                           {% if request.GET.expert_words %}checked{% endif %}>
-                    <label for="expert_words" class="text-sm text-gray-700 select-none">Solo palabras de experto</label>
-                </div>
+                <label for="expert_lists" class="mb-1 text-sm font-medium text-gray-700">Lista de experto:</label>
+                <select name="selected_list" id="expert_lists"
+                        class="border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition w-full text-gray-800 shadow-sm">
+                    <option value="">-- Todas --</option>
+                    {% for expert_list in expert_lists %}
+                        <option value="{{ expert_list.name }}" {% if expert_list.name == selected_list_name %}selected{% endif %}> 
+                            {{ expert_list.name }}
+                        </option>
+                    {% endfor %}
+                </select>
             </div>
 
             <!-- !Botones -->
@@ -65,11 +76,11 @@
                     Filtrar
                 </button>
 
-                <a href="{% url 'export_excel' %}?year={{ request.GET.year }}&company={{ request.GET.company }}{% if request.GET.expert_words %}&expert_words=on{% endif %}"
-                   class="inline-flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white px-5 py-2.5 rounded-lg shadow transition font-medium">
+                <a href="{% url 'export_excel' %}?selected_year={{ request.GET.selected_year }}&company={{ request.GET.company }}&selected_list={{ request.GET.selected_list }}"
+                class="inline-flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white px-5 py-2.5 rounded-lg shadow transition font-medium">
                     <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                              d="M12 4v16m8-8H4"/>
+                            d="M12 4v16m8-8H4"/>
                     </svg>
                     Exportar a Excel
                 </a>

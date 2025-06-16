@@ -12,25 +12,31 @@ def total_count_view(request):
     total_counts = TotalCount.objects.all().order_by("-year", "-quantity")
 
     # Filtrar por año, empresa y palabras clave
-    year = request.GET.get("year")
+    year = request.GET.get("selected_year")
     company_id = request.GET.get("company")
-    solo_claves = request.GET.get("expert_words")
+    expert = request.user.expert_profile  # gracias al related_name='expert_profile'
+    expert_lists = ExpertWord.objects.filter(expert=expert)
+    years = total_counts.values_list("year", flat=True).distinct().order_by("-year")
 
     if year:
         total_counts = total_counts.filter(year=year)
     if company_id:
         total_counts = total_counts.filter(company__id=company_id)
     
-    if solo_claves is not None:
+    # Filtrar por la lista de palabras clave seleccionada en el front (expert_lists.name)
+    selected_list_name = request.GET.get("selected_list")
+    if selected_list_name:
         try:
-            expert = request.user.expert_profile  # gracias al related_name='expert_profile'
-            expert_word_objs = ExpertWord.objects.filter(expert=expert)
-            # Obtener palabras asociadas al experto
-            expert_words = list(chain.from_iterable(word_obj.words for word_obj in expert_word_objs if word_obj.words))
-            # Filtrar los conteos solo por palabras clave del experto
-            total_counts = total_counts.filter(word__in=expert_words)
+            # Buscar la lista de palabras clave del experto con el nombre seleccionado
+            expert_word_obj = ExpertWord.objects.filter(expert=expert, name=selected_list_name).first()
+            if expert_word_obj and expert_word_obj.words:
+                expert_words = list(expert_word_obj.words)
+                total_counts = total_counts.filter(word__in=expert_words)
+            else:
+                total_counts = total_counts.none()
         except Expert.DoesNotExist:
             total_counts = total_counts.none()  # Usuario no tiene perfil de experto
+
 
     # Cálculos estadísticos
     total_quantity = total_counts.aggregate(suma=Sum("quantity"))["suma"] or 0
@@ -50,6 +56,10 @@ def total_count_view(request):
         "companies": companies,
         "average": average,
         "word_average": word_average,
+        "expert_lists": expert_lists,
+        "selected_list_name": selected_list_name,
+        "years": years,
+        "selected_year": year,
     })
 
 
@@ -57,23 +67,30 @@ def total_count_view(request):
 def export_total_count_excel(request):
     total_counts = TotalCount.objects.all().order_by("-year", "-quantity")
 
-    year = request.GET.get("year")
+    # Leer los mismos parámetros que la vista principal
+    year = request.GET.get("selected_year")
     company_id = request.GET.get("company")
-    solo_claves = request.GET.get("expert_words")
+    selected_list = request.GET.get("selected_list")
 
+    # Aplicar filtros igual que en total_count_view
     if year:
         total_counts = total_counts.filter(year=year)
     if company_id:
         total_counts = total_counts.filter(company__id=company_id)
-    if solo_claves is not None:
+
+    if selected_list:
         try:
             expert = request.user.expert_profile  # gracias al related_name='expert_profile'
-            expert_word_objs = ExpertWord.objects.filter(expert=expert)
-            palabras_expert = list(chain.from_iterable(word_obj.words for word_obj in expert_word_objs if word_obj.words))
-            total_counts = total_counts.filter(word__in=palabras_expert)
+            expert_word_obj = ExpertWord.objects.filter(expert=expert, name=selected_list).first()
+            if expert_word_obj and expert_word_obj.words:
+                expert_words = list(expert_word_obj.words)
+                total_counts = total_counts.filter(word__in=expert_words)
+            else:
+                total_counts = total_counts.none()
         except Expert.DoesNotExist:
             total_counts = total_counts.none()
 
+    # Cálculos estadísticos
     total_quantity = total_counts.aggregate(suma=Sum("quantity"))["suma"] or 0
     count = total_counts.count()
     average = round(total_quantity / count, 2) if count > 0 else 0
@@ -83,15 +100,15 @@ def export_total_count_excel(request):
         for item in total_counts
     }
 
-    # Crear libro Excel
+    # Crear el archivo Excel
     wb = openpyxl.Workbook()
     ws = wb.active
     ws.title = "Conteo Total"
 
-    # Escribir encabezados
+    # Encabezados
     ws.append(["Palabra", "Cantidad", "Peso", "Empresa", "Año"])
 
-    # Escribir datos
+    # Filas de datos
     for item in total_counts:
         ws.append([
             item.word,
@@ -101,15 +118,18 @@ def export_total_count_excel(request):
             item.year,
         ])
 
-    # Fila vacía como separador
+    # Fila vacía
     ws.append([])
 
-    # Fila de promedio total
+    # Promedio total
     ws.append(["", "", "Promedio total:", average])
 
-    # Preparar respuesta HTTP
-    response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+    # Preparar la respuesta HTTP
+    response = HttpResponse(
+        content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    )
     response['Content-Disposition'] = 'attachment; filename=conteo_total.xlsx'
     wb.save(response)
     return response
+
 

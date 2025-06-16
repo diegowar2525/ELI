@@ -3,9 +3,9 @@ from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.conf import settings
-from .models import Company
-from .forms import IndividualReportUploadForm, ZipUploadForm
-from .main import process_report, process_zip
+from ..models import Company
+from ..forms import IndividualReportUploadForm, ZipUploadForm
+from ..main import process_report, process_zip
 
 
 # * ---------------------------------------- VISTAS GENERALES ----------------------------------------
