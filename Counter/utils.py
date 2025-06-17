@@ -95,6 +95,9 @@ def insertar_empresas(archivo_excel):
     print("Empresas importadas correctamente.")
 
 
+
+
+
 # from Counter.models import Province, Company
 # from Counter.utils import insertar_empresas
 

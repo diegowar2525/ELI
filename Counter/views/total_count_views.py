@@ -4,30 +4,29 @@ from django.db.models import Sum
 from django.http import HttpResponse
 from django.shortcuts import render
 import openpyxl
+
 from ..models import TotalCount, Company, ExpertWord, Expert
 
 
-@login_required
-def total_count_view(request):
-    total_counts = TotalCount.objects.all().order_by("-year", "-quantity")
+def get_filtered_total_counts(request, total_counts=None):
+    """
+    Aplica los filtros de año, empresa y lista de palabras clave al queryset de TotalCount.
+    """
+    if total_counts is None:
+        total_counts = TotalCount.objects.all().order_by("-year", "-quantity")
 
-    # Filtrar por año, empresa y palabras clave
     year = request.GET.get("selected_year")
     company_id = request.GET.get("company")
-    expert = request.user.expert_profile  # gracias al related_name='expert_profile'
-    expert_lists = ExpertWord.objects.filter(expert=expert)
-    years = total_counts.values_list("year", flat=True).distinct().order_by("-year")
+    selected_list_name = request.GET.get("selected_list")
 
     if year:
         total_counts = total_counts.filter(year=year)
     if company_id:
         total_counts = total_counts.filter(company__id=company_id)
-    
-    # Filtrar por la lista de palabras clave seleccionada en el front (expert_lists.name)
-    selected_list_name = request.GET.get("selected_list")
+
     if selected_list_name:
         try:
-            # Buscar la lista de palabras clave del experto con el nombre seleccionado
+            expert = request.user.expert_profile  # gracias al related_name='expert_profile'
             expert_word_obj = ExpertWord.objects.filter(expert=expert, name=selected_list_name).first()
             if expert_word_obj and expert_word_obj.words:
                 expert_words = list(expert_word_obj.words)
@@ -35,21 +34,39 @@ def total_count_view(request):
             else:
                 total_counts = total_counts.none()
         except Expert.DoesNotExist:
-            total_counts = total_counts.none()  # Usuario no tiene perfil de experto
+            total_counts = total_counts.none()
 
+    return total_counts
+
+
+def get_word_average(total_counts, average):
+    """
+    Calcula el peso de cada palabra en relación al promedio.
+    """
+    return {
+        item.id: round(item.quantity / average, 2) if item.quantity > 0 else 0
+        for item in total_counts
+    }
+
+
+@login_required
+def total_count_view(request):
+    total_counts = TotalCount.objects.all().order_by("-year", "-quantity")
+    total_counts = get_filtered_total_counts(request, total_counts)
+
+    # Datos auxiliares para filtros
+    years = TotalCount.objects.values_list("year", flat=True).distinct().order_by("-year")
+    companies = Company.objects.filter(totalcount__isnull=False).distinct().order_by("name")
+    expert = request.user.expert_profile
+    expert_lists = ExpertWord.objects.filter(expert=expert)
+    selected_list_name = request.GET.get("selected_list")
+    year = request.GET.get("selected_year")
 
     # Cálculos estadísticos
     total_quantity = total_counts.aggregate(suma=Sum("quantity"))["suma"] or 0
     count = total_counts.count()
     average = round(total_quantity / count, 2) if count > 0 else 0
-
-    # Diccionario con pesos por ID
-    word_average = {
-        item.id: round(item.quantity / average, 2) if item.quantity > 0 else 0
-        for item in total_counts
-    }
-
-    companies = Company.objects.all().order_by("name")
+    word_average = get_word_average(total_counts, average)
 
     return render(request, "totalcount.html", {
         "total_counts": total_counts,
@@ -66,39 +83,13 @@ def total_count_view(request):
 @login_required
 def export_total_count_excel(request):
     total_counts = TotalCount.objects.all().order_by("-year", "-quantity")
-
-    # Leer los mismos parámetros que la vista principal
-    year = request.GET.get("selected_year")
-    company_id = request.GET.get("company")
-    selected_list = request.GET.get("selected_list")
-
-    # Aplicar filtros igual que en total_count_view
-    if year:
-        total_counts = total_counts.filter(year=year)
-    if company_id:
-        total_counts = total_counts.filter(company__id=company_id)
-
-    if selected_list:
-        try:
-            expert = request.user.expert_profile  # gracias al related_name='expert_profile'
-            expert_word_obj = ExpertWord.objects.filter(expert=expert, name=selected_list).first()
-            if expert_word_obj and expert_word_obj.words:
-                expert_words = list(expert_word_obj.words)
-                total_counts = total_counts.filter(word__in=expert_words)
-            else:
-                total_counts = total_counts.none()
-        except Expert.DoesNotExist:
-            total_counts = total_counts.none()
+    total_counts = get_filtered_total_counts(request, total_counts)
 
     # Cálculos estadísticos
     total_quantity = total_counts.aggregate(suma=Sum("quantity"))["suma"] or 0
     count = total_counts.count()
     average = round(total_quantity / count, 2) if count > 0 else 0
-
-    word_average = {
-        item.id: round(item.quantity / average, 2) if item.quantity > 0 else 0
-        for item in total_counts
-    }
+    word_average = get_word_average(total_counts, average)
 
     # Crear el archivo Excel
     wb = openpyxl.Workbook()
@@ -118,10 +109,8 @@ def export_total_count_excel(request):
             item.year,
         ])
 
-    # Fila vacía
+    # Fila vacía y promedio total
     ws.append([])
-
-    # Promedio total
     ws.append(["", "", "Promedio total:", average])
 
     # Preparar la respuesta HTTP
@@ -131,5 +120,3 @@ def export_total_count_excel(request):
     response['Content-Disposition'] = 'attachment; filename=conteo_total.xlsx'
     wb.save(response)
     return response
-
-

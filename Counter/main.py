@@ -5,17 +5,19 @@ from collections import Counter
 from tempfile import TemporaryDirectory
 
 from django.db.models import F
+from django.core.files import File
 
 from .models import TotalCountReport, Report, TotalCount
 from .stopwords import STOPWORDS_ES
 from .utils import quitar_tildes, extraer_texto_pdf_inteligente, encontrar_compañia_año
 
+# --- Constantes ---
 STOPWORDS_ES_NORMALIZADAS = set(quitar_tildes(p) for p in STOPWORDS_ES)
 
+# --- Funciones utilitarias ---
 
-def contar_palabras(texto: str) -> Counter:
+def count_words(texto: str) -> Counter:
     """Cuenta las palabras en un texto, normalizando y eliminando stopwords."""
-
     texto = texto.lower()
     palabras = re.findall(r"\b[a-záéíóúüñ]+\b", texto)
     palabras = [quitar_tildes(p) for p in palabras]
@@ -24,6 +26,18 @@ def contar_palabras(texto: str) -> Counter:
     ]
     return Counter(palabras_filtradas)
 
+def find_paragraph(report: Report, palabra: str) -> list[str]:
+    """
+    Dado un reporte y una palabra, extrae el texto del PDF y devuelve los párrafos que contienen la palabra.
+    """
+    palabra = quitar_tildes(palabra.lower())
+    texto = extraer_texto_pdf_inteligente(report.file.path)
+    parrafos = re.split(r'\n{2,}|\r\n{2,}', texto)
+    return [
+        p.strip() for p in parrafos if palabra in quitar_tildes(p.lower())
+    ]
+
+# --- Funciones principales ---
 
 def process_report(report_path: str, report_instance: Report):
     """Procesa un reporte PDF, actualiza nombre, empresa y año, y guarda su conteo de palabras."""
@@ -31,7 +45,6 @@ def process_report(report_path: str, report_instance: Report):
     company, year = encontrar_compañia_año(texto)
 
     # Actualiza los campos del reporte solo si no se han proporcionado
-
     if not getattr(report_instance, "name", None):
         report_instance.name = os.path.basename(report_path)
     if not getattr(report_instance, "company", None):
@@ -39,7 +52,7 @@ def process_report(report_path: str, report_instance: Report):
     if not getattr(report_instance, "year", None):
         report_instance.year = year
     report_instance.save()
-    conteo = contar_palabras(texto)
+    conteo = count_words(texto)
 
     company = report_instance.company
     year = report_instance.year
@@ -61,10 +74,8 @@ def process_report(report_path: str, report_instance: Report):
                     quantity=F("quantity") + cantidad
                 )
 
-
 def process_zip(zip_path: str, company=None):
     """Procesa un archivo ZIP que contiene múltiples reportes PDF, incluyendo subcarpetas."""
-
     with zipfile.ZipFile(zip_path, "r") as zip_ref, TemporaryDirectory() as temp_dir:
         zip_ref.extractall(temp_dir)
 
@@ -76,11 +87,14 @@ def process_zip(zip_path: str, company=None):
                 file_path = os.path.join(root, filename)
 
                 try:
-                    report = Report.objects.create(
-                        file=file_path,
-                        company=company,
-                    )
-                    process_report(file_path, report)
+                    with open(file_path, "rb") as f:
+                        django_file = File(f)
+                        report = Report(company=company)
+                        # Guarda el archivo PDF en MEDIA_ROOT con el nombre original
+                        report.file.save(filename, django_file, save=True)
+
+                    # Procesa el reporte con la función que ya tienes
+                    process_report(report.file.path, report)
 
                 except Exception as e:
                     print(f"Error procesando {file_path}: {e}")

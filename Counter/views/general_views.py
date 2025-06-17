@@ -30,7 +30,10 @@ def upload_view(request):
             if individual_form.is_valid():
                 reporte = individual_form.save()
                 
-                # Función para procesar el reporte individual
+                uploaded_file = request.FILES['file']
+                reporte.name = uploaded_file.name
+                reporte.save()
+
                 process_report(reporte.file.path, reporte)
 
                 messages.success(request, f"Reporte subido y procesado correctamente.")
@@ -41,21 +44,19 @@ def upload_view(request):
             if zip_form.is_valid():
                 zip_file = zip_form.cleaned_data["zip_file"]
                 company = zip_form.cleaned_data["company"]
-                zip_path = os.path.join(
-                    settings.MEDIA_ROOT, "zip_uploads", zip_file.name
-                )
-                os.makedirs(os.path.dirname(zip_path), exist_ok=True)
+
+                zip_dir = os.path.join(settings.MEDIA_ROOT, "zip_uploads")
+                os.makedirs(zip_dir, exist_ok=True)
+                zip_path = os.path.join(zip_dir, zip_file.name)
 
                 with open(zip_path, "wb+") as destination:
                     for chunk in zip_file.chunks():
                         destination.write(chunk)
 
-                # Procesa el archivo ZIP que acabas de guardar
+                # Ahora usa la función corregida para procesar el ZIP
                 process_zip(zip_path, company)
 
-                messages.success(
-                    request, f"Archivo ZIP subido y procesado correctamente."
-                )
+                messages.success(request, f"Archivo ZIP subido y procesado correctamente.")
                 return redirect("upload")
 
     return render(
@@ -67,11 +68,6 @@ def upload_view(request):
             "companies": companies,
         },
     )
-
-
-@login_required
-def concealment_detection_view(request):
-    return render(request, "concealment_detection.html")
 
 
 @login_required

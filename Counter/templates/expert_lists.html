@@ -105,30 +105,34 @@
 
 <!-- Modal Crear/Editar -->
 <div id="expertModal"
-     class="fixed inset-0 bg-black/40 hidden flex items-center justify-center z-50">
+  class="fixed inset-0 bg-black/40 hidden flex items-center justify-center z-50">
   <div class="bg-white rounded-xl p-6 w-full max-w-md shadow-lg">
-    <h3 id="modalTitle" class="text-xl font-semibold mb-4">Nueva Lista de Expertos</h3>
+    <h3 id="modalTitle" class="text-xl font-semibold mb-4 text-gray-800">Nueva Lista de Expertos</h3>
 
     <!-- Un único formulario reutilizable -->
     <form id="list-form" data-expert-id="">
-      {% csrf_token %}
-      <input type="hidden" id="list-id">
+   {% csrf_token %}
+   <input type="hidden" id="list-id">
 
-      <div class="mb-4">
-        <label for="list-name" class="block text-sm font-medium text-gray-700">Nombre de la lista</label>
-        <input type="text" id="list-name"
-               class="mt-1 block w-full border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500"
-               required>
-        <label for="list-words" class="block text-sm font-medium text-gray-700">Palabras (separadas por coma)</label>
-        <input type="text" id="list-words" name="words"
-              class="mt-1 block w-full rounded-md border-gray-300 shadow-sm sm:text-sm"
-              placeholder="ej: alerta, sensor, cámara">
-      </div>
+   <div class="mb-4 space-y-3">
+     <div>
+    <label for="list-name" class="block text-sm font-medium text-gray-700 mb-1">Nombre de la lista</label>
+    <input type="text" id="list-name"
+        class="mt-1 block w-full border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 px-3 py-2 text-gray-800"
+        required>
+     </div>
+     <div>
+    <label for="list-words" class="block text-sm font-medium text-gray-700 mb-1">Palabras (separadas por coma)</label>
+    <input type="text" id="list-words" name="words"
+       class="mt-1 block w-full border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 px-3 py-2 text-gray-800"
+       placeholder="ej: alerta, sensor, cámara">
+     </div>
+   </div>
 
-      <div class="flex justify-end space-x-2">
-        <button type="button" onclick="closeModal()" class="text-gray-500 hover:text-gray-700">Cancelar</button>
-        <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">Guardar</button>
-      </div>
+   <div class="flex justify-end space-x-2 pt-2">
+     <button type="button" onclick="closeModal()" class="text-gray-500 hover:text-gray-700 px-4 py-2 rounded-lg transition">Cancelar</button>
+     <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition">Guardar</button>
+   </div>
     </form>
   </div>
 </div>
