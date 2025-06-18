@@ -96,8 +96,7 @@
                     <th class="px-4 py-2 text-left">Palabra</th>
                     <th class="px-4 py-2 text-left">Cantidad</th>
                     <th class="px-4 py-2 text-left">Peso</th>
-                    <th class="px-4 py-2 text-left">Empresa</th>
-                    <th class="px-4 py-2 text-left">Año</th>
+                    <!-- Ya no tienes acceso directo a empresa ni año -->
                 </tr>
             </thead>
             <tbody>
@@ -105,13 +104,11 @@
                 <tr class="hover:bg-gray-50 transition">
                     <td class="px-4 py-2">{{ total.word }}</td>
                     <td class="px-4 py-2">{{ total.quantity }}</td>
-                    <td class="px-4 py-2">{{ word_average|get_item:total.id }}</td>
-                    <td class="px-4 py-2">{{ total.company.name }}</td>
-                    <td class="px-4 py-2">{{ total.year }}</td>
+                    <td class="px-4 py-2">{{ word_average|get_item:total.word }}</td>
                 </tr>
                 {% empty %}
                 <tr>
-                    <td colspan="5" class="px-4 py-4 text-center text-gray-500 italic">
+                    <td colspan="3" class="px-4 py-4 text-center text-gray-500 italic">
                         No se ha procesado ningún informe con estos filtros.
                     </td>
                 </tr>
@@ -123,6 +120,10 @@
         <div class="mt-6 bg-blue-50 text-blue-800 rounded-xl p-4 text-center font-semibold text-lg shadow-inner">
             Promedio total: {{ average }}
         </div>
+        
     </div>
+
+
+
 </div>
 {% endblock %}

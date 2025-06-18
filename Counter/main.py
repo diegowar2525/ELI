@@ -40,11 +40,9 @@ def find_paragraph(report: Report, palabra: str) -> list[str]:
 # --- Funciones principales ---
 
 def process_report(report_path: str, report_instance: Report):
-    """Procesa un reporte PDF, actualiza nombre, empresa y año, y guarda su conteo de palabras."""
     texto = extraer_texto_pdf_inteligente(report_path)
     company, year = encontrar_compañia_año(texto)
 
-    # Actualiza los campos del reporte solo si no se han proporcionado
     if not getattr(report_instance, "name", None):
         report_instance.name = os.path.basename(report_path)
     if not getattr(report_instance, "company", None):
@@ -52,27 +50,24 @@ def process_report(report_path: str, report_instance: Report):
     if not getattr(report_instance, "year", None):
         report_instance.year = year
     report_instance.save()
-    conteo = count_words(texto)
 
-    company = report_instance.company
-    year = report_instance.year
+    conteo = count_words(texto)
 
     for palabra, cantidad in conteo.items():
         TotalCountReport.objects.update_or_create(
             report=report_instance, word=palabra, defaults={"quantity": cantidad}
         )
 
-        if year and company:
-            obj, creado = TotalCount.objects.get_or_create(
-                year=year,
-                word=palabra,
-                company=company,
-                defaults={"quantity": cantidad},
+        # Solo se actualiza el conteo total, sin importar año o empresa
+        obj, creado = TotalCount.objects.get_or_create(
+            word=palabra,
+            defaults={"quantity": cantidad},
+        )
+        if not creado:
+            TotalCount.objects.filter(pk=obj.pk).update(
+                quantity=F("quantity") + cantidad
             )
-            if not creado:
-                TotalCount.objects.filter(pk=obj.pk).update(
-                    quantity=F("quantity") + cantidad
-                )
+
 
 def process_zip(zip_path: str, company=None):
     """Procesa un archivo ZIP que contiene múltiples reportes PDF, incluyendo subcarpetas."""
