@@ -53,7 +53,6 @@ def upload_view(request):
                     for chunk in zip_file.chunks():
                         destination.write(chunk)
 
-                # Ahora usa la función corregida para procesar el ZIP
                 process_zip(zip_path, company)
 
                 messages.success(request, f"Archivo ZIP subido y procesado correctamente.")
