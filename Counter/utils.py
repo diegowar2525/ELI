@@ -1,6 +1,5 @@
 import re
 import unicodedata
-
 import fitz  # PyMuPDF
 import pandas as pd
 import pytesseract
@@ -16,7 +15,7 @@ def extraer_texto_pdf(path: str) -> str:
     with fitz.open(path) as doc:
         for page in doc:
             texto += page.get_text()
-    return texto
+    return texto 
 
 
 def extraer_texto_ocr_pdf(path: str) -> str:
@@ -98,7 +97,8 @@ def insertar_empresas(archivo_excel):
 
 
 
-# from Counter.models import Province, Company
-# from Counter.utils import insertar_empresas
-
+#from Counter.models import Province, Company
+#from Counter.utils import insertar_empresas
 # insertar_empresas(r"C:\Users\SOMOS UNEMI\Downloads\ELI\Empresas.xlsx")
+#insertar_empresas(r"D:\Prácticas\Empresas.xlsx")
+#Hola
