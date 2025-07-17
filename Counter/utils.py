@@ -1,6 +1,5 @@
 import re
 import unicodedata
-
 import fitz  # PyMuPDF
 import pandas as pd
 import pytesseract
@@ -98,7 +97,7 @@ def insertar_empresas(archivo_excel):
 
 
 
-# from Counter.models import Province, Company
-# from Counter.utils import insertar_empresas
+#from Counter.models import Province, Company
+#from Counter.utils import insertar_empresas
 
-# insertar_empresas(r"C:\Users\Usuario\Downloads\Prácticas\Empresas.xlsx")
+#insertar_empresas(r"D:\Prácticas\Empresas.xlsx")
