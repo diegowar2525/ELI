@@ -101,4 +101,4 @@ def insertar_empresas(archivo_excel):
 # from Counter.models import Province, Company
 # from Counter.utils import insertar_empresas
 
-# insertar_empresas(r"C:\Users\Usuario\Downloads\Prácticas\Empresas.xlsx")
+# insertar_empresas(r"C:\Users\SOMOS UNEMI\Downloads\ELI\Empresas.xlsx")
