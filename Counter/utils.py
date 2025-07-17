@@ -15,7 +15,7 @@ def extraer_texto_pdf(path: str) -> str:
     with fitz.open(path) as doc:
         for page in doc:
             texto += page.get_text()
-    return texto
+    return texto 
 
 
 def extraer_texto_ocr_pdf(path: str) -> str:
