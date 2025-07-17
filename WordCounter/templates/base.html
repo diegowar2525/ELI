@@ -4,55 +4,76 @@
 <head>
     <meta charset="UTF-8">
     <title>{% block title %}Enterprise Lex Index{% endblock %}</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
-    {% block custom_css %} {% endblock %}
+    {% block custom_css %} 
+    <style>
+    body {
+        font-family: 'Poppins', sans-serif;
+    }
+    </style>
+    {% endblock %}
 </head>
 
 <body class="bg-gray-100 text-gray-900 flex flex-col min-h-screen">
 
     <!-- !Navegación -->
-    <nav class="bg-white shadow-md">
-        <div class="container mx-auto px-4 py-4 flex items-center justify-between">
-            <a href="{% url 'index' %}" class="text-3xl font-bold text-blue-600 flex-shrink-0">ELI</a>
-            <ul class="flex items-center space-x-6 ml-auto">
-                {% if user.is_authenticated %}
-                <li>
-                    <div class="text-gray-700 font-medium flex items-center">
-                        ¡Bienvenido, <span class="font-bold text-blue-600 ml-1">{{ user.username }}!</span>
-                    </div>
-                </li>
-                <li>
-                    <form action="{% url 'logout' %}" method="post" class="flex items-center">
-                        {% csrf_token %}
-                        <button type="submit"
-                            class="text-red-600 hover:underline bg-transparent border-none cursor-pointer">Cerrar
-                            sesión</button>
-                    </form>
-                </li>
-                <li>
-                    <a href="{% url 'panel' %}" class="text-gray-700 hover:text-blue-600 flex items-center">Panel de administración</a>
-                </li>
-                <li>
-                    <a href="{% url 'profile' %}" class="flex items-center">
-                        {% if user.profile.picture %}
-                            <img src="{{ user.profile.picture.url }}" alt="Foto de perfil" class="w-16 h-16 rounded-full object-cover">
-                        {% else %}
-                        <div class="w-12 h-12 rounded-full bg-gray-300 flex items-center justify-center text-gray-600">
-                            <span class="text-sm">👤</span>
-                        </div>
-                        {% endif %}
-                    </a>
-                </li>
+    <nav class="bg-white shadow-md border-b border-gray-200">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex flex-col md:flex-row md:items-center md:justify-between py-4 space-y-4 md:space-y-0">
+        
+          <!-- Logo + Bienvenida -->
+          <div class="flex flex-col sm:flex-row sm:items-center sm:space-x-4 text-center sm:text-left">
+            <a href="{% url 'index' %}" class="text-3xl font-extrabold text-blue-600">ELI</a>
+            {% if user.is_authenticated %}
+            <span class="text-gray-700 font-medium text-sm sm:text-base">
+              ¡Bienvenido, <span class="font-bold text-blue-600">{{ user.username }}</span>!
+            </span>
+            {% endif %}
+          </div>
+        
+          <!-- Menú -->
+          <ul class="flex flex-col md:flex-row md:items-center md:space-x-6 space-y-4 md:space-y-0 text-center md:text-left">
+            {% if user.is_authenticated %}
+            <li>
+              <a href="{% url 'panel' %}" class="text-gray-700 hover:text-blue-600 font-medium transition">
+                Panel de administración
+              </a>
+            </li>
+            <li>
+              <a href="{% url 'profile' %}" class="flex justify-center md:justify-start items-center">
+                {% if user.profile.picture %}
+                <img src="{{ user.profile.picture.url }}" alt="Foto de perfil" class="w-10 h-10 rounded-full object-cover border-2 border-blue-500 shadow-sm">
                 {% else %}
-                <li>
-                    <a href="{% url 'login' %}" class="text-gray-700 hover:text-blue-600 flex items-center">Iniciar sesión</a>
-                </li>
-                <li>
-                    <a href="{% url 'register' %}" class="text-gray-700 hover:text-blue-600 flex items-center">Registrarse</a>
-                </li>
+                <div class="w-10 h-10 rounded-full bg-gray-300 flex items-center justify-center text-gray-600 shadow-inner">
+                  <span class="text-base">👤</span>
+                </div>
                 {% endif %}
-            </ul>
+              </a>
+            </li>
+            <li>
+              <form action="{% url 'logout' %}" method="post">
+                {% csrf_token %}
+                <button type="submit" class="text-red-600 hover:underline font-medium transition">
+                  Cerrar sesión
+                </button>
+              </form>
+            </li>
+            {% else %}
+            <li>
+              <a href="{% url 'login' %}" class="text-gray-700 hover:text-blue-600 font-medium transition">
+                Iniciar sesión
+              </a>
+            </li>
+            <li>
+              <a href="{% url 'register' %}" class="text-gray-700 hover:text-blue-600 font-medium transition">
+                Registrarse
+              </a>
+            </li>
+            {% endif %}
+          </ul>
         </div>
+      </div>
     </nav>
 
     <!-- !Contenido principal -->
@@ -67,6 +88,5 @@
 
     {% block scripts %}
     {% endblock %}
-</body>
-
+  </body>
 </html>
