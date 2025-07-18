@@ -15,12 +15,18 @@
             </svg>
             Panel de administración
         </a>
+        <!-- *Botón crear -->
+        <a href="{% url 'upload' %}">
+            <button class="bg-green-500 hover:bg-green-600 text-white font-semibold py-2 px-4 rounded justify-center mt-4">
+            Subir Reporte
+            </button>
+        </a>
     </div>
 
     <h1 class="text-3xl font-bold mb-6">Lista de Reportes</h1>
 
     <!-- !Modal Detalles reporte-->
-    <div id="detailsModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden">
+    <div id="detailsModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50">
         <div class="bg-white p-6 rounded-xl w-full max-w-md shadow-lg relative">
             <h2 class="text-xl font-bold mb-4">Detalles del reporte</h2>
             <p><strong>Id:</strong> <span id="detail-id"></span></p>
@@ -34,7 +40,7 @@
     </div>
 
     <!-- !Modal Editar reporte-->
-    <div id="editModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden">
+    <div id="editModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50">
     <div class="bg-white p-6 rounded-xl w-full max-w-md shadow-lg">
         <h2 class="text-xl font-bold mb-4">Editar reporte</h2>
         <form id="editReportForm" onsubmit="submitEditForm(event)">
@@ -64,7 +70,7 @@
     </div>
 
     <!-- !Modal Borrar reporte-->
-    <div id="deleteModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden">
+    <div id="deleteModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50">
         <div class="bg-white p-6 rounded-xl w-full max-w-sm shadow-lg">
             <h2 class="text-lg font-bold mb-4">¿Eliminar reporte?</h2>
             <p class="mb-4">¿Estás seguro de eliminar el reporte?</p>
@@ -76,78 +82,72 @@
     </div>
 
     <!-- !Tabla -->
-    <div class="bg-white shadow rounded-2xl overflow-x-auto">
-        <table class="min-w-full table-auto text-sm text-gray-700">
-            <thead class="bg-gray-200 text-gray-700">
-                <tr>
-                    <th class="px-4 py-2 text-left">ID</th>
-                    <th class="px-4 py-2 text-left">Nombre</th>
-                    <th class="px-4 py-2 text-left">Año</th>
-                    <th class="px-4 py-2 text-left">Empresa</th>
-                    <th class="px-4 py-2 text-left">Acciones</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for report in reports %}
-                <tr id="reporte-{{ report.id }}" class="border-t hover:bg-gray-100">
-                    <td class="px-4 py-2">{{ report.id }}</td>
-                    <td class="px-4 py-2">{{ report.name }}</td>
-                    <td class="px-4 py-2">{{ report.year }}</td>
-                    <td class="px-4 py-2">{{ report.company.name }}</td>
-                    <td class="px-4 py-2">
-                        {% if report %}
-                            <button class="bg-purple-500 hover:bg-blue-600 text-white font-semibold py-1 px-3 rounded inline-flex items-center">
-                                <a href="{% url 'report_count' report.id %}" class="flex items-center">
-
-                                    <!-- Icono: Chart Bar -->
+    <div class="bg-white shadow rounded-2xl overflow-hidden">
+        <div class="overflow-y-auto" style="height: 400px;">
+            <table class="min-w-full table-auto text-sm text-gray-700">
+                <thead class="bg-gray-200 text-gray-700 sticky top-0 z-10">
+                    <tr>
+                        <th class="px-4 py-2 text-left">ID</th>
+                        <th class="px-4 py-2 text-left">Nombre</th>
+                        <th class="px-4 py-2 text-left">Año</th>
+                        <th class="px-4 py-2 text-left">Empresa</th>
+                        <th class="px-4 py-2 text-left">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for report in reports %}
+                    <tr id="reporte-{{ report.id }}" class="border-t hover:bg-gray-100">
+                        <td class="px-4 py-2">{{ report.id }}</td>
+                        <td class="px-4 py-2">{{ report.name }}</td>
+                        <td class="px-4 py-2">{{ report.year }}</td>
+                        <td class="px-4 py-2">{{ report.company.name }}</td>
+                        <td class="px-4 py-2">
+                            {% if report %}
+                                <button class="bg-purple-500 hover:bg-blue-600 text-white font-semibold py-1 px-3 rounded inline-flex items-center">
+                                    <a href="{% url 'report_count' report.id %}" class="flex items-center"
+                                    title="Ver conteo del reporte">
+                                        <!-- Icono: Chart Bar -->
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3v18h18M9 17V9m4 8V5m4 12v-6" />
+                                        </svg>
+                                        
+                                    </a>
+                                </button>
+                                <button onclick="showDetails({{ report.id }})"
+                                    title="Detalle"
+                                    class="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-1 px-3 rounded inline-flex items-center">
+                                    <!-- Icono: Eye -->
                                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3v18h18M9 17V9m4 8V5m4 12v-6" />
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0zm-6.928 4.485A9.969 9.969 0 0112 4.5c2.485 0 4.735.909 6.485 2.485M12 4.5C9.515 4.5 7.265 5.409 5.515 6.985M12 19.5c-2.485 0-4.735-.909-6.485-2.485M12 19.5c2.485 0 4.735-.909 6.485-2.485" />
                                     </svg>
-                                    Conteo
-                                </a>
-                            </button>
-                            <button onclick="showDetails({{ report.id }})"
-                                class="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-1 px-3 rounded inline-flex items-center">
-                                <!-- Icono: Eye -->
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0zm-6.928 4.485A9.969 9.969 0 0112 4.5c2.485 0 4.735.909 6.485 2.485M12 4.5C9.515 4.5 7.265 5.409 5.515 6.985M12 19.5c-2.485 0-4.735-.909-6.485-2.485M12 19.5c2.485 0 4.735-.909 6.485-2.485" />
-                                </svg>
-                                Detalles
-                            </button>
-                            <button onclick="openEditModal({{ report.id }})"
-                                class="bg-yellow-500 hover:bg-yellow-600 text-white font-semibold py-1 px-3 rounded inline-flex items-center">
-                                <!-- Icono: Pencil -->
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536M9 13l6-6 3.536 3.536-6 6H9v-3.536z" />
-                                </svg>
-                                Editar
-                            </button>
-                            <button onclick="openDeleteModal({{ report.id }})"
-                                class="bg-red-500 hover:bg-red-600 text-white font-semibold py-1 px-3 rounded inline-flex items-center">
-                                <!-- Icono: Trash -->
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                                </svg>
-                                Borrar
-                            </button>
-                        {% endif %}
-                    </td>
-                </tr>
-                {% empty %}
-                <tr>
-                    <td colspan="5" class="px-4 py-4 text-center text-gray-500">No hay reportes disponibles.</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </div>
-    <!-- *Botón crear -->
-    <div class="mb-4">
-        <a href="{% url 'upload' %}">
-            <button class="bg-green-500 hover:bg-green-600 text-white font-semibold py-2 px-4 rounded justify-center mt-4">
-            Subir Reporte
-            </button>
-        </a>
+                                </button>
+                                <button onclick="openEditModal({{ report.id }})"
+                                    title="Editar"
+                                    class="bg-yellow-500 hover:bg-yellow-600 text-white font-semibold py-1 px-3 rounded inline-flex items-center">
+                                    <!-- Icono: Pencil -->
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536M9 13l6-6 3.536 3.536-6 6H9v-3.536z" />
+                                    </svg>
+                                </button>
+                                <button onclick="openDeleteModal({{ report.id }})"
+                                    title="Borrar"
+                                    class="bg-red-500 hover:bg-red-600 text-white font-semibold py-1 px-3 rounded inline-flex items-center">
+                                    <!-- Icono: Trash -->
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                                    </svg>
+                                </button>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="5" class="px-4 py-4 text-center text-gray-500">No hay reportes disponibles.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>    
     </div>
 </div>
 
