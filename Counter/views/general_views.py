@@ -26,16 +26,11 @@ def upload_view(request):
 
     if request.method == "POST":
         if "upload_individual" in request.POST:
+            print(request.POST)
             individual_form = IndividualReportUploadForm(request.POST, request.FILES)
             if individual_form.is_valid():
                 reporte = individual_form.save()
-                
-                uploaded_file = request.FILES['file']
-                reporte.name = uploaded_file.name
-                reporte.save()
-
                 process_report(reporte.file.path, reporte)
-
                 messages.success(request, f"Reporte subido y procesado correctamente.")
                 return redirect("upload")
 

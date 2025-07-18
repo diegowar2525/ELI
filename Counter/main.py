@@ -38,16 +38,16 @@ def find_paragraph(report: Report, palabra: str) -> list[str]:
     ]
 
 # --- Funciones principales ---
-
+# Proceso de análisis de cada PDF
 def process_report(report_path: str, report_instance: Report):
     texto = extraer_texto_pdf_inteligente(report_path)
     company, year = encontrar_compañia_año(texto)
 
-    if not getattr(report_instance, "name", None):
+    if not report_instance.name:
         report_instance.name = os.path.basename(report_path)
-    if not getattr(report_instance, "company", None):
+    if not report_instance.company:
         report_instance.company = company
-    if not getattr(report_instance, "year", None):
+    if not report_instance.year:
         report_instance.year = year
     report_instance.save()
 
@@ -68,9 +68,8 @@ def process_report(report_path: str, report_instance: Report):
                 quantity=F("quantity") + cantidad
             )
 
-
+#Manejo de archivo zip
 def process_zip(zip_path: str, company=None):
-    """Procesa un archivo ZIP que contiene múltiples reportes PDF, incluyendo subcarpetas."""
     with zipfile.ZipFile(zip_path, "r") as zip_ref, TemporaryDirectory() as temp_dir:
         zip_ref.extractall(temp_dir)
 

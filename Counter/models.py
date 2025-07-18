@@ -13,9 +13,7 @@ class Province(models.Model):
 
 
 class Company(models.Model):
-    province = models.ForeignKey(
-        Province, on_delete=models.CASCADE, null=True, blank=True
-    )
+    province = models.ForeignKey(Province, on_delete=models.CASCADE, null=True, blank=True)
     ruc = models.CharField(max_length=11, unique=True)
     name = models.CharField(max_length=255)
 

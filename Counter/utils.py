@@ -5,12 +5,10 @@ import pandas as pd
 import pytesseract
 from fuzzywuzzy import fuzz
 from pdf2image import convert_from_path
-
 from .models import Province, Company
 
-
+#Extraer texto de PDF digital
 def extraer_texto_pdf(path: str) -> str:
-    """Extrae texto de un PDF digital."""
     texto = ""
     with fitz.open(path) as doc:
         for page in doc:
@@ -18,8 +16,8 @@ def extraer_texto_pdf(path: str) -> str:
     return texto 
 
 
+#Extraer texto de PDF Escaneado
 def extraer_texto_ocr_pdf(path: str) -> str:
-    """Extrae texto de un PDF escaneado (OCR)."""
     texto = ""
     paginas = convert_from_path(path)
     for img in paginas:
@@ -27,16 +25,16 @@ def extraer_texto_ocr_pdf(path: str) -> str:
     return texto
 
 
+#Verificar si el PDF es digital o escaneado
 def extraer_texto_pdf_inteligente(path: str) -> str:
-    """Detecta si el PDF es digital o escaneado y extrae el texto apropiadamente."""
     texto = extraer_texto_pdf(path)
-    if not texto.strip():  # Si el texto está vacío, probablemente es un PDF escaneado
+    if not texto.strip():  
         texto = extraer_texto_ocr_pdf(path)
     return texto
 
 
+#Quita tildes y diacriticos de una palabra
 def quitar_tildes(palabra: str) -> str:
-    """Quita tildes y diacríticos de una palabra."""
     return "".join(
         c
         for c in unicodedata.normalize("NFD", palabra)
@@ -44,10 +42,10 @@ def quitar_tildes(palabra: str) -> str:
     )
 
 
+#Busca el nombre de empresa y una año en el texto de un PDF. Devuelve valores por defecto si no hay coincidencias
 def encontrar_compañia_año(text: str):
-    """Busca el nombre de la empresa y un año en el texto. Devuelve valores por defecto si no encuentra coincidencias."""
     year_match = re.search(r"\b(19|20)\d{2}\b", text)
-    year = int(year_match.group()) if year_match else 2023
+    year = int(year_match.group()) if year_match else None
 
     best_score = 0
     best_company = None
@@ -59,17 +57,11 @@ def encontrar_compañia_año(text: str):
             best_score = score
             best_company = company
 
-    if not best_company:
-        try:
-            best_company = Company.objects.get(name__iexact="Sin empresa")
-        except Company.DoesNotExist:
-            best_company = Company.objects.create(name="Sin empresa")
-
     return best_company, year
 
 
+#Cargar empresas desde un archivo Excel
 def insertar_empresas(archivo_excel):
-    """Carga empresas desde un archivo Excel."""
     df = pd.read_excel(archivo_excel)
 
     for _, row in df.iterrows():
@@ -95,10 +87,7 @@ def insertar_empresas(archivo_excel):
 
 
 
-
-
 #from Counter.models import Province, Company
 #from Counter.utils import insertar_empresas
 # insertar_empresas(r"C:\Users\SOMOS UNEMI\Downloads\ELI\Empresas.xlsx")
 #insertar_empresas(r"D:\Prácticas\Empresas.xlsx")
-#Hola

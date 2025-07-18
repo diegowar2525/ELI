@@ -92,8 +92,20 @@
                 <tr id="reporte-{{ report.id }}" class="border-t hover:bg-gray-100">
                     <td class="px-4 py-2">{{ report.id }}</td>
                     <td class="px-4 py-2">{{ report.name }}</td>
-                    <td class="px-4 py-2">{{ report.year }}</td>
-                    <td class="px-4 py-2">{{ report.company.name }}</td>
+                    <td class="px-4 py-2">
+                        {% if report.year %}
+                            {{ report.year }}
+                        {% else %}
+                            Año no asignado
+                        {% endif %}
+                    </td>
+                    <td class="px-4 py-2">
+                        {% if report.company %}
+                            {{ report.company.name }}
+                        {% else %}
+                            Empresa no asignada
+                        {% endif %}
+                    </td>
                     <td class="px-4 py-2">
                         {% if report %}
                             <button class="bg-purple-500 hover:bg-blue-600 text-white font-semibold py-1 px-3 rounded inline-flex items-center">
