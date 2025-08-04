@@ -26,8 +26,7 @@ def get_filtered_total_counts(request):
 
     if selected_list_name:
         try:
-            expert = request.user.expert_profile
-            expert_word_obj = ExpertWord.objects.filter(expert=expert, name=selected_list_name).first()
+            expert_word_obj = ExpertWord.objects.filter(name=selected_list_name).first()
             if expert_word_obj and expert_word_obj.words:
                 expert_words = list(expert_word_obj.words)
                 queryset = queryset.filter(word__in=expert_words)
@@ -61,8 +60,7 @@ def total_count_view(request):
 
     years = Report.objects.values_list("year", flat=True).distinct().order_by("-year")
     companies = Company.objects.filter(report__isnull=False).distinct().order_by("name")
-    expert = request.user.expert_profile
-    expert_lists = ExpertWord.objects.filter(expert=expert)
+    expert_lists = ExpertWord.objects.all()
 
     selected_list_name = request.GET.get("selected_list")
     selected_year = request.GET.get("selected_year")
@@ -115,4 +113,3 @@ def export_total_count_excel(request):
     response['Content-Disposition'] = 'attachment; filename=conteo_total.xlsx'
     wb.save(response)
     return response
-

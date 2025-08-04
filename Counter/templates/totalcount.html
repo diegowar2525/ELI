@@ -89,9 +89,12 @@
     </div>
 
     <!-- !Tabla -->
-    <div class="bg-white shadow rounded-2xl overflow-x-auto">
+    <div class="mt-6 bg-blue-50 text-blue-800 rounded-xl p-4 text-center font-semibold text-lg shadow-inner">
+        Promedio total: {{ average }}
+    </div>
+    <div class="bg-white shadow rounded-2xl overflow-x-auto overflow-y-auto" style="height: 500px;">
         <table class="min-w-full table-auto text-sm text-gray-700">
-            <thead class="bg-gray-200">
+            <thead class="bg-gray-200 sticky top-0 z-10">
                 <tr>
                     <th class="px-4 py-2 text-left">Palabra</th>
                     <th class="px-4 py-2 text-left">Cantidad</th>
@@ -115,12 +118,6 @@
                 {% endfor %}
             </tbody>
         </table>
-
-        <!-- !Promedio -->
-        <div class="mt-6 bg-blue-50 text-blue-800 rounded-xl p-4 text-center font-semibold text-lg shadow-inner">
-            Promedio total: {{ average }}
-        </div>
-        
     </div>
 
 

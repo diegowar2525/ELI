@@ -1,5 +1,5 @@
 from django import forms
-from .models import Report, Company
+from .models import Report, Company, ExpertWord
 
 
 class IndividualReportUploadForm(forms.ModelForm):
@@ -33,7 +33,7 @@ class ZipUploadForm(forms.Form):
     company = forms.ModelChoiceField(
         queryset=Company.objects.all(),
         required=False,
-        widget=forms.Select(attrs={"class": "border rounded px-2 py-1"}),
+        widget=forms.Select(attrs={"class": "w-full min-w-0 block border rounded px-2 py-2 focus:outline-none focus:ring-2 focus:ring-green-500"}),
     )
 
 
@@ -46,3 +46,18 @@ class CompanyForm(forms.ModelForm):
             "name": forms.TextInput(attrs={"class": "border rounded px-2 py-1"}),
             "province": forms.Select(attrs={"class": "border rounded px-2 py-1"}),
         }
+
+
+
+class ComparativeListsForm(forms.Form):
+    list1 = forms.ModelChoiceField(
+        queryset=ExpertWord.objects.all(),
+        label="Lista 1",
+        widget=forms.Select(attrs={"class": "w-full border border-gray-300 rounded px-3 py-2"})
+    )
+    list2 = forms.ModelChoiceField(
+        queryset=ExpertWord.objects.all(),
+        label="Lista 2",
+        widget=forms.Select(attrs={"class": "w-full border border-gray-300 rounded px-3 py-2"})
+    )
+

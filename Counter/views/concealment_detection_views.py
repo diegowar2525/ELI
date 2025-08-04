@@ -17,6 +17,9 @@ def concealment_detection_view(request):
         selected_report = get_object_or_404(Report, id=report_id)
         paragraphs = find_paragraph(selected_report, palabra)
 
+    if palabra is None:
+        palabra = ""
+
     return render(
         request,
         "concealment_detection.html",
