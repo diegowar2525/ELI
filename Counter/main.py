@@ -43,12 +43,14 @@ def process_report(report_path: str, report_instance: Report):
     texto = extraer_texto_pdf_inteligente(report_path)
     company, year = encontrar_compañia_año(texto)
 
+    year_from_filename = os.path.basename(report_path).replace(".pdf", "")[:4]
+
     if not report_instance.name:
         report_instance.name = os.path.basename(report_path)
     if not report_instance.company:
         report_instance.company = company
     if not report_instance.year:
-        report_instance.year = year
+        report_instance.year = int(year_from_filename)
     report_instance.save()
 
     conteo = count_words(texto)
