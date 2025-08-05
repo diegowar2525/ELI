@@ -4,7 +4,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.conf import settings
 from ..models import Company
-from ..forms import IndividualReportUploadForm, ZipUploadForm
+from ..forms import IndividualReportUploadForm, ZipUploadForm, ComparativeListsForm
 from ..main import process_report, process_zip
 
 
@@ -64,9 +64,35 @@ def upload_view(request):
     )
 
 
-@login_required
 def comparative_analysis_view(request):
-    return render(request, "comparative_analysis.html")
+    resultado = None
+
+    def normalize_words(word_list):
+        return set(w.strip().lower() for w in word_list if w)
+
+    if request.method == "POST":
+        form = ComparativeListsForm(request.POST)
+        if form.is_valid():
+            list1 = form.cleaned_data["list1"]
+            list2 = form.cleaned_data["list2"]
+
+            words1 = normalize_words(list1.words or [])
+            words2 = normalize_words(list2.words or [])
+
+            resultado = {
+                "list1": list1,
+                "list2": list2,
+                "comunes": sorted(words1 & words2),
+                "solo_en_1": sorted(words1 - words2),
+                "solo_en_2": sorted(words2 - words1),
+            }
+    else:
+        form = ComparativeListsForm()
+
+    return render(request, "comparative_analysis.html", {
+        "form": form,
+        "resultado": resultado,
+    })
 
 
 @login_required

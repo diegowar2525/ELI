@@ -17,7 +17,7 @@
         </a>
         <!-- *Botón crear -->
         <a href="{% url 'upload' %}">
-            <button class="bg-green-500 hover:bg-green-600 text-white font-semibold py-2 px-4 rounded justify-center mt-4">
+            <button class="bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-4 rounded justify-center mt-4">
             Subir Reporte
             </button>
         </a>
@@ -82,9 +82,9 @@
     </div>
 
     <!-- !Tabla -->
-    <div class="bg-white shadow rounded-2xl overflow-x-auto">
+    <div class="bg-white shadow rounded-2xl overflow-x-auto overflow-y-auto h-[400px]" style="height: 500px;">
         <table class="min-w-full table-auto text-sm text-gray-700">
-            <thead class="bg-gray-200 text-gray-700">
+            <thead class="bg-gray-200 text-gray-700 sticky top-0 z-10">
                 <tr>
                     <th class="px-4 py-2 text-left">ID</th>
                     <th class="px-4 py-2 text-left">Nombre</th>
@@ -112,35 +112,33 @@
                             Empresa no asignada
                         {% endif %}
                     </td>
-<td class="px-4 py-2">
-    {% if report %}
-        <button class="bg-purple-500 hover:bg-blue-600 text-white font-semibold py-1 px-3 rounded inline-flex items-center">
-            <a href="{% url 'report_count' report.id %}" class="flex items-center">
-                <!-- Icono: Chart Bar -->
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0zm-6.928 4.485A9.969 9.969 0 0112 4.5c2.485 0 4.735.909 6.485 2.485M12 4.5C9.515 4.5 7.265 5.409 5.515 6.985M12 19.5c-2.485 0-4.735-.909-6.485-2.485M12 19.5c2.485 0 4.735-.909 6.485-2.485" />
-                </svg>
-                Ver
-            </a>
-        </button>
-        <button onclick="openEditModal({{ report.id }})"
-            title="Editar"
-            class="bg-yellow-500 hover:bg-yellow-600 text-white font-semibold py-1 px-3 rounded inline-flex items-center">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536M9 13l6-6 3.536 3.536-6 6H9v-3.536z" />
-            </svg>
-            Editar
-        </button>
-        <button onclick="openDeleteModal({{ report.id }})"
-            title="Eliminar"
-            class="bg-red-500 hover:bg-red-600 text-white font-semibold py-1 px-3 rounded inline-flex items-center">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-            </svg>
-            Eliminar
-        </button>
-    {% endif %}
-</td>
+                    <td class="px-4 py-2">
+                        {% if report %}
+                            <button class="bg-purple-500 hover:bg-blue-600 text-white font-semibold py-1 px-3 rounded inline-flex items-center"
+                            title="Ver">
+                                <a href="{% url 'report_count' report.id %}" class="flex items-center">
+                                    <!-- Icono: Chart Bar -->
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0zm-6.928 4.485A9.969 9.969 0 0112 4.5c2.485 0 4.735.909 6.485 2.485M12 4.5C9.515 4.5 7.265 5.409 5.515 6.985M12 19.5c-2.485 0-4.735-.909-6.485-2.485M12 19.5c2.485 0 4.735-.909 6.485-2.485" />
+                                    </svg>
+                                </a>
+                            </button>
+                            <button onclick="openEditModal({{ report.id }})"
+                                title="Editar"
+                                class="bg-yellow-500 hover:bg-yellow-600 text-white font-semibold py-1 px-3 rounded inline-flex items-center">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536M9 13l6-6 3.536 3.536-6 6H9v-3.536z" />
+                                </svg>
+                            </button>
+                            <button onclick="openDeleteModal({{ report.id }})"
+                                title="Eliminar"
+                                class="bg-red-500 hover:bg-red-600 text-white font-semibold py-1 px-3 rounded inline-flex items-center">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                                </svg>
+                            </button>
+                        {% endif %}
+                    </td>
 
                     </tr>
                     {% empty %}

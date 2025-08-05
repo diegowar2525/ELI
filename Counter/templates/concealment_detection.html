@@ -54,7 +54,7 @@
     {% if paragraphs %}
         <div>
             <h2 class="text-xl font-semibold text-gray-800 mb-4">Párrafos encontrados para: <span class="text-blue-600">"{{ palabra }}"</span> en <span class="italic">{{ selected_report.name }}</span></h2>
-            <ul class="space-y-4">
+            <ul class="space-y-4 overflow-y-auto" style="max-height: 600px;">
                 {% for p in paragraphs %}
                     <li class="bg-gray-100 border border-gray-200 rounded-lg p-4 shadow-sm text-gray-700">
                         {{ p|linebreaks }}

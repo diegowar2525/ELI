@@ -49,7 +49,7 @@
 
           <!-- Botón Nueva lista -->
           <button
-            class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition flex-shrink-0"
+            class="bg-blue-600 font-semibold text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition flex-shrink-0"
             data-expert-id="{{ expert.id }}"
             onclick="openNewListModal(this)">
             + Nueva Lista
@@ -58,7 +58,7 @@
 
         <!-- Listas del experto -->
         {% if expert.word_lists.all %}
-          <div class="space-y-4 mt-4">
+          <div class="space-y-4 mt-4 overflow-y-auto" style="max-height: 350px;">
             {% for lista in expert.word_lists.all %}
               <div id="list-row-{{ lista.id }}" class="bg-gray-50 border border-gray-200 rounded-lg p-4">
                 <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 mb-2">
