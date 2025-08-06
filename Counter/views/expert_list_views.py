@@ -1,13 +1,15 @@
 import json
 from django.shortcuts import render, get_object_or_404
 from django.http import JsonResponse, HttpResponseNotAllowed
+from django.shortcuts import redirect
 from ..models import Expert, ExpertWord
 
 
 def expert_list_view(request):
-    """Muestra el template con todos los expertos y sus listas."""
+    if not (request.user.is_superuser or Expert.objects.filter(user=request.user).exists()):
+        return redirect('panel')
+
     experts = Expert.objects.prefetch_related("word_lists")
-    
     return render(request, "expert_lists.html", {"experts": experts})
 
 

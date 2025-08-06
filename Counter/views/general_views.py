@@ -1,12 +1,13 @@
 import os
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.conf import settings
-from ..models import Company
+from ..models import Company, Expert
 from ..forms import IndividualReportUploadForm, ZipUploadForm, ComparativeListsForm
 from ..main import process_report, process_zip
-
+from User.models import Expert, User
+from django.contrib.auth import get_user_model
 
 # * ---------------------------------------- VISTAS GENERALES ----------------------------------------
 def index_view(request):
@@ -65,8 +66,10 @@ def upload_view(request):
 
 
 def comparative_analysis_view(request):
+    if not (request.user.is_superuser or Expert.objects.filter(user=request.user).exists()):
+        return redirect('panel')
+    
     resultado = None
-
     def normalize_words(word_list):
         return set(w.strip().lower() for w in word_list if w)
 
@@ -95,6 +98,36 @@ def comparative_analysis_view(request):
     })
 
 
+User = get_user_model()
+
 @login_required
 def user_view(request):
-    return render(request, "users.html")
+    # Solo superusuarios
+    if not request.user.is_superuser:
+        return redirect('panel')
+    users = User.objects.exclude(id=request.user.id)
+
+    if request.method == "POST":
+        user_id = request.POST.get("user_id")
+        action = request.POST.get("action")
+        profession = request.POST.get("profession", "")
+
+        user = get_object_or_404(User, id=user_id)
+
+        if action == "make_expert":
+            Expert.objects.get_or_create(user=user, defaults={"profession": profession})
+        elif action == "remove_expert":
+            Expert.objects.filter(user=user).delete()
+        elif action == "make_superuser":
+            user.is_superuser = True
+            user.is_staff = True
+            user.save()
+        elif action == "remove_superuser":
+            if request.user != user:
+                user.is_superuser = False
+                user.is_staff = False
+                user.save()
+
+        return redirect("users")  # recargar la página
+
+    return render(request, "users.html", {"users": users})

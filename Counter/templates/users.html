@@ -1,0 +1,97 @@
+{% extends "base.html" %}
+
+{% block title %}Análisis comparativo | ELI{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4">
+    <!-- !Botón para volver al panel -->
+    <div class="mb-6">
+        <a href="{% url 'panel' %}"
+           class="inline-flex items-center gap-2 bg-gradient-to-r from-blue-500 to-blue-700 hover:from-blue-600 hover:to-blue-800 text-white font-medium py-2.5 px-6 rounded-xl shadow-md transition-all duration-300">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
+                stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M3 10h18M3 6h18M3 14h18M3 18h18"/>
+            </svg>
+            Panel de administración
+        </a>
+    </div>
+
+    <h2 class="text-xl font-semibold mb-4">Gestión de usuarios</h2>
+<table class="table-auto w-full mb-6">
+    <thead>
+        <tr>
+            <th class="px-4 py-2">Usuario</th>
+            <th class="px-4 py-2">Email</th>
+            <th class="px-4 py-2">Es experto</th>
+            <th class="px-4 py-2">Es superusuario</th>
+            <th class="px-4 py-2">Acciones</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for user in users %}
+        <tr>
+            <td class="border px-4 py-2">{{ user.username }}</td>
+            <td class="border px-4 py-2">{{ user.email }}</td>
+            <td class="border px-4 py-2">
+                {{ user.expert_profile.profession|default:"No" }}
+            </td>
+            <td class="border px-4 py-2">
+                {{ user.is_superuser|yesno:"Sí,No" }}
+            </td>
+            <td class="border px-4 py-2">
+                <!-- Si es experto, permitir quitar; si no, permitir asignar -->
+                {% if user.expert_profile %}
+                    <form method="post" class="inline">
+                        {% csrf_token %}
+                        <input type="hidden" name="user_id" value="{{ user.id }}">
+                        <input type="hidden" name="action" value="remove_expert">
+                        <button type="submit"
+                                class="bg-red-500 hover:bg-red-600 text-white font-bold py-1 px-3 rounded text-sm">
+                            Quitar experto
+                        </button>
+                    </form>
+                {% else %}
+                    <form method="post" class="inline">
+                        {% csrf_token %}
+                        <input type="hidden" name="user_id" value="{{ user.id }}">
+                        <input type="hidden" name="action" value="make_expert">
+                        <input type="text" name="profession" placeholder="Profesión" required
+                               class="border rounded px-2 py-1 text-sm">
+                        <button type="submit"
+                                class="bg-green-500 hover:bg-green-600 text-white font-bold py-1 px-3 rounded text-sm">
+                            Hacer experto
+                        </button>
+                    </form>
+                {% endif %}
+                
+                <!-- Superusuario toggle -->
+                {% if user.is_superuser %}
+                    <form method="post" class="inline ml-2">
+                        {% csrf_token %}
+                        <input type="hidden" name="user_id" value="{{ user.id }}">
+                        <input type="hidden" name="action" value="remove_superuser">
+                        <button type="submit"
+                                class="bg-red-600 hover:bg-red-700 text-white font-bold py-1 px-3 rounded text-sm">
+                            Quitar superusuario
+                        </button>
+                    </form>
+                {% else %}
+                    <form method="post" class="inline ml-2">
+                        {% csrf_token %}
+                        <input type="hidden" name="user_id" value="{{ user.id }}">
+                        <input type="hidden" name="action" value="make_superuser">
+                        <button type="submit"
+                                class="bg-purple-500 hover:bg-purple-600 text-white font-bold py-1 px-3 rounded text-sm">
+                            Hacer superusuario
+                        </button>
+                    </form>
+                {% endif %}
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+</div>
+{% endblock %}
